@@ -1,4 +1,7 @@
 package com.example.blockchaininfo.repositories;
 
-public interface NetworkHashrateRepository {
+import com.example.blockchaininfo.model.NetworkHashrate;
+import org.springframework.data.repository.CrudRepository;
+
+public interface NetworkHashrateRepository extends CrudRepository<NetworkHashrate, Long> {
 }

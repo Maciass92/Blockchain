@@ -14,6 +14,8 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+    <script type="text/javascript" src="resources/static/js/openPoolModal.js"></script>
+
 </head>
 
 <body>
@@ -31,15 +33,32 @@
             </tr>
             </thead>
 
-            <tr th:each="workdayCommand, i : ${workdayForm.workdayCommands}">
-                <td><a href="#" role="button" th:href="@{'/employee/' + ${workdayCommand.employee.id}}" th:text="${workdayCommand.employee.name}">Id1</a></td>
-                <td th:text="${workdayCommand.employee.address}">Maven Street 10, Glasgow</td>
-                <td th:text="${workdayCommand.employee.contact}">999-999-999</td>
+            <tr th:each="networkHashrate : ${networkHashrates}" onclick="openPoolModal()">
+                <td th:text="${networkHashrate.id}"> Sample data</td>
+                <td th:text="${networkHashrate.rep_date}">Maven Street 10, Glasgow</td>
+                <td th:text="${networkHashrate.hashrate}">999-999-999</td>
             </tr>
+
+            <script>
+function openPoolModal(id){
+
+    console.log("I've been called");
+
+$.ajax({
+    url: "/" + id,
+    success: function(data){
+    $("#PoolModalHolder").html(data);
+    $("#PoolModal").modal("show");
+    }
+});
+}
+</script>
 
         </table>
 
 </div>
+
+
 
 </body>
 
