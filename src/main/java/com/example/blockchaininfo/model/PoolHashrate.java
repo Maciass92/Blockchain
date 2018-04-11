@@ -13,15 +13,15 @@ public class PoolHashrate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @OneToOne
+    @ManyToOne
     @NotNull
-    @JoinColumn(name = "network_id")
+    @JoinColumn(name = "network_Id")
     private NetworkHashrate networkHashrate;
 
     @OneToOne
     @NotNull
-    @JoinColumn(name = "pool_id")
-    private PoolHashrate poolHashrate;
+    @JoinColumn(name = "pool_Id")
+    private PoolDef poolDef;
 
     private double hashrate;
 }

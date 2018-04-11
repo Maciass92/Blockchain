@@ -14,6 +14,7 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
+    <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
 
 </head>
 
@@ -25,10 +26,9 @@
 
             <thead class="thead-inverse">
             <tr>
-                <th class="col-md-2">Id</th>
+                <th class="col-md-2">Network Id</th>
                 <th class="col-md-2">Rep_date</th>
                 <th class="col-md-2">Hashrate</th>
-
             </tr>
             </thead>
 
@@ -42,7 +42,9 @@
 
 </div>
 
-<script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
+<div id="PoolModalHolder">
+
+</div>
 
 </body>
 

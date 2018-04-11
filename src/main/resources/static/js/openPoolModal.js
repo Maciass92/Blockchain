@@ -6,7 +6,9 @@ $.ajax({
     url: "/" + id,
     success: function(data){
     $("#PoolModalHolder").html(data);
-    $("#PoolModal").modal("show");
+    $("#personalModal").modal();
+    $("#personalModal").modal('show');
+    console.log("Data: " + data);
     }
 });
 }

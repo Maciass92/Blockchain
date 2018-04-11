@@ -22,5 +22,5 @@ insert into pool_hashrate (
     hashrate, network_id, pool_id
 )
 select
-    s.a*s.a::double precision, s.a, s.a
+    s.a*s.a::double precision, 17 - s.a, s.a
 from generate_series(1, 16, 1) AS s(a);

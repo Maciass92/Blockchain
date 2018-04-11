@@ -29,10 +29,9 @@ public class NetworkHashrateService {
         return networkHashrateList;
     }
 
-
     public PoolHashrate getPoolHashrate(Long id){
 
-        Optional<PoolHashrate> poolHashrateOptional = poolHashrateRepository.findById(id);
+        Optional<PoolHashrate> poolHashrateOptional = poolHashrateRepository.findByNetworkId(id);
 
         if(!poolHashrateOptional.isPresent())
             return null;

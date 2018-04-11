@@ -7,7 +7,6 @@ import javax.persistence.*;
 
 import java.time.OffsetDateTime;
 
-
 @Data
 @Entity
 public class NetworkHashrate {
