@@ -14,7 +14,6 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="resources/static/js/openPoolModal.js"></script>
 
 </head>
 
@@ -33,32 +32,17 @@
             </tr>
             </thead>
 
-            <tr th:each="networkHashrate : ${networkHashrates}" onclick="openPoolModal()">
+            <tr th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
                 <td th:text="${networkHashrate.id}"> Sample data</td>
                 <td th:text="${networkHashrate.rep_date}">Maven Street 10, Glasgow</td>
                 <td th:text="${networkHashrate.hashrate}">999-999-999</td>
             </tr>
 
-            <script>
-function openPoolModal(id){
-
-    console.log("I've been called");
-
-$.ajax({
-    url: "/" + id,
-    success: function(data){
-    $("#PoolModalHolder").html(data);
-    $("#PoolModal").modal("show");
-    }
-});
-}
-</script>
-
         </table>
 
 </div>
 
-
+<script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
 
 </body>
 

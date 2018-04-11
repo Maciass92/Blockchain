@@ -5,10 +5,8 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
+
 
 @Data
 @Entity
@@ -22,5 +20,4 @@ public class NetworkHashrate {
     private OffsetDateTime rep_date;
 
     private double hashrate;
-
 }

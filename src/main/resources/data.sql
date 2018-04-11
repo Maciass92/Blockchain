@@ -13,16 +13,14 @@ insert into pool_def (
 )
 select
     left(md5(random()::text), 10),
-    current_timestamp - (s.a || ' hour')::interval,
+    current_timestamp - (s.a || ' hour')::interval
 from generate_series(0, 15, 1) AS s(a);
 
 
 
 insert into pool_hashrate (
-    hashrate
+    hashrate, network_id, pool_id
 )
 select
-    s.a::double precision
-from generate_series(0, 15, 1) AS s(a);
-
-
+    s.a*s.a::double precision, s.a, s.a
+from generate_series(1, 16, 1) AS s(a);
