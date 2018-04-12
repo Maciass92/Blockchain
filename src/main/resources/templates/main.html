@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -20,26 +20,35 @@
 
 <body>
 
-<div class="table-responsive">
+<div class="container-fluid" style="margin-top: 20px">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover ">
 
-        <table class="table table-hover ">
+                            <thead class="thead-inverse">
+                            <tr>
+                                <th class="col-md-2 text-center">Network Id</th>
+                                <th class="col-md-2 text-center">Rep_date</th>
+                                <th class="col-md-2 text-center">Hashrate</th>
+                            </tr>
+                            </thead>
 
-            <thead class="thead-inverse">
-            <tr>
-                <th class="col-md-2">Network Id</th>
-                <th class="col-md-2">Rep_date</th>
-                <th class="col-md-2">Hashrate</th>
-            </tr>
-            </thead>
+                            <tr th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
+                                <td class="text-center" th:text="${networkHashrate.id}"> Sample data</td>
+                                <td class="text-center" th:text="${networkHashrate.rep_date}">Maven Street 10, Glasgow</td>
+                                <td class="text-center" th:text="${networkHashrate.hashrate}">999-999-999</td>
+                            </tr>
 
-            <tr th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
-                <td th:text="${networkHashrate.id}"> Sample data</td>
-                <td th:text="${networkHashrate.rep_date}">Maven Street 10, Glasgow</td>
-                <td th:text="${networkHashrate.hashrate}">999-999-999</td>
-            </tr>
+                        </table>
 
-        </table>
-
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="PoolModalHolder">
