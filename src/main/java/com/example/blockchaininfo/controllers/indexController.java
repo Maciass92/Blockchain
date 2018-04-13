@@ -29,6 +29,4 @@ public class indexController {
 
         return "networkDetails :: modalContents";
     }
-
-
 }

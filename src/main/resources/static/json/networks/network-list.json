@@ -1,0 +1,10 @@
+{
+  "networks" : [
+    {
+      "name" : "Turtle-Coin",
+      "url" : "https://turtle-coin.com/",
+      "hashrate_url" : "https://turtle-coin.com/q/hashrate",
+      "id" : "1"
+    }
+  ]
+}

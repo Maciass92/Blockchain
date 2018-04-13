@@ -15,6 +15,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
+    <script type="text/javascript" src="../js/getNetworkData.js" th:src="@{/js/getNetworkData.js}"></script>
+    <script type="text/javascript" src="../js/getPoolsData.js" th:src="@{/js/getPoolsData.js}"></script>
+
 
 </head>
 
@@ -40,11 +43,15 @@
                                 <td class="text-center" th:text="${networkHashrate.id}"> Sample data</td>
                                 <td class="text-center" th:text="${networkHashrate.rep_date}">Maven Street 10, Glasgow</td>
                                 <td class="text-center" th:text="${networkHashrate.hashrate}">999-999-999</td>
+                                </td>
                             </tr>
 
                         </table>
 
                     </div>
+                    <button type="button" class="btn btn-success" th:onclick="'javascript:getNetworkData();'">Networks!</button>
+                    <button type="button" class="btn btn-success" th:onclick="'javascript:getPoolsData();'">Pools!</button>
+
                 </div>
             </div>
         </div>
