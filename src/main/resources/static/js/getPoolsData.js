@@ -2,7 +2,6 @@ function getPoolsData(){
 $.getJSON('../json/networks/Turtlecoin/turtlecoin-pools.json', function(data) {
 
     var date_from = new Date();
-    console.log(date_from);
     var pools_hashrates = [{"date_from" : date_from}];
 
 data.pools.forEach(function(pool){
@@ -35,7 +34,27 @@ data.pools.forEach(function(pool){
 
 });
 
-console.log(pools_hashrates);
+
+var myTimer = setInterval((function(){
+    if (jQuery.active == 0){
+        $.ajax({
+              type: "POST",
+              contentType : 'application/json; charset=utf-8',
+              dataType : 'json',
+              async: false,
+              url: "/savePoolsData",
+              data: JSON.stringify(pools_hashrates),
+              success :function(result) {
+                  console.log("Success!");
+             }
+          });
+        clearInterval(myTimer); // stop the interval once you the get calls finished and you send the ajax call
+    }
+}, 10000));
+
+
+
+
 
 });
 }

@@ -24,3 +24,12 @@ insert into pool_hashrate (
 select
     s.a*s.a::double precision, 17 - s.a, s.a
 from generate_series(1, 16, 1) AS s(a);
+
+insert into pool_hashrate (hashrate, network_id, pool_id)
+values (10.0, 2, 13);
+
+insert into pool_hashrate (hashrate, network_id, pool_id)
+values (150.0, 2, 12);
+
+insert into pool_hashrate (hashrate, network_id, pool_id)
+values (10000.0, 2, 11);

@@ -26,11 +26,30 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title" th:text="'Network Id: ' + ${poolHashrate.networkHashrate.id}">Network Id</h4>
+                <h4 class="modal-title" th:text="'Network Id: ' + ${poolHashrates[0].networkHashrate.id}">Network Id</h4>
             </div>
             <div class="modal-body">
-                <h5 th:text="'Pool hashrate: ' + ${poolHashrate.hashrate}">hashrate</h5>
-                <h5 th:text="'Pool_Id: ' + ${poolHashrate.poolDef.id}">hashrate</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover ">
+
+                        <thead class="thead-inverse">
+                        <tr>
+                            <th class="col-md-2 text-center">Pool name</th>
+                            <th class="col-md-2 text-center">Date from</th>
+                            <th class="col-md-2 text-center">Hashrate</th>
+                        </tr>
+                        </thead>
+
+                        <tr th:each="poolHashrate : ${poolHashrates}">
+                            <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
+                            <td class="text-center" th:text="${poolHashrate.poolDef.date_from}">Maven Street 10, Glasgow</td>
+                            <td class="text-center" th:text="${poolHashrate.hashrate}">999-999-999</td>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div>
 
             </div>
         </div>

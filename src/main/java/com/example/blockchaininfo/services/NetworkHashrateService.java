@@ -29,13 +29,12 @@ public class NetworkHashrateService {
         return networkHashrateList;
     }
 
-    public PoolHashrate getPoolHashrate(Long id){
+    public List<PoolHashrate> getAllPools(Long id){
 
-        Optional<PoolHashrate> poolHashrateOptional = poolHashrateRepository.findByNetworkId(id);
+        List<PoolHashrate> poolsList = new ArrayList<>();
 
-        if(!poolHashrateOptional.isPresent())
-            return null;
+        poolHashrateRepository.findAllByNetworkId(id).iterator().forEachRemaining(poolsList::add);
 
-        return poolHashrateOptional.get();
+        return poolsList;
     }
 }

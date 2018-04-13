@@ -11,6 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -43,16 +45,17 @@ public class indexControllerTest {
     public void getNetworkInfoTest() throws Exception {
 
         //given
+        List<PoolHashrate> poolHashrateList = new ArrayList<>();
         PoolHashrate poolHashrate = new PoolHashrate();
-
+        poolHashrateList.add(poolHashrate);
         //when
-        when(networkHashrateService.getPoolHashrate(anyLong())).thenReturn(poolHashrate);
+        when(networkHashrateService.getAllPools(anyLong())).thenReturn(poolHashrateList);
 
         //then
         mockMvc.perform(get("/1"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("poolHashrate"));
 
-        verify(networkHashrateService, times(1)).getPoolHashrate(anyLong());
+        verify(networkHashrateService, times(1)).getAllPools(anyLong());
     }
 }

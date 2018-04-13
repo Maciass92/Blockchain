@@ -4,9 +4,9 @@ import com.example.blockchaininfo.services.NetworkHashrateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RequiredArgsConstructor
 @Controller
@@ -25,8 +25,22 @@ public class indexController {
     @RequestMapping("/{id}")
     public String getNetworkDetails(Model model, @PathVariable String id){
 
-        model.addAttribute("poolHashrate", netService.getPoolHashrate(new Long(id)));
+        model.addAttribute("poolHashrates", netService.getAllPools(new Long(id)));
 
         return "networkDetails :: modalContents";
+    }
+
+    @RequestMapping("/savePoolsData")
+    public @ResponseBody String getPoolsData(@RequestBody String string){
+
+        System.out.println("Triggered: " + string);
+        return "Success mvc";
+    }
+
+    @RequestMapping("/saveNetworkData")
+    public @ResponseBody String getNetworkData(@RequestBody String string){
+
+        System.out.println("Network triggered: " + string);
+        return "Success mvc";
     }
 }

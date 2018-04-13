@@ -5,11 +5,13 @@ $.getJSON('../json/networks/network-list.json', function(data) {
 
 data.networks.forEach(function(network){
 
-    var api_url = network.hashrate_url;
     var rep_date = new Date();
-    var xmlHttp = new XMLHttpRequest();
+    var network_id = network.id;
 
-    var networkJson = [{"rep_date" : rep_date}];
+    var networkJson = [{"rep_date" : rep_date}, {"id" : network_id}];
+
+    var api_url = network.hashrate_url;
+    var xmlHttp = new XMLHttpRequest();
 
     xmlHttp.onreadystatechange = function() {
          if (xmlHttp.readyState == XMLHttpRequest.DONE){
@@ -28,6 +30,18 @@ data.networks.forEach(function(network){
     }
 
     console.log(networkJson);
+
+    $.ajax({
+          type: "POST",
+          contentType : 'application/json; charset=utf-8',
+          dataType : 'json',
+          url: "/saveNetworkData",
+          async: false,
+          data: JSON.stringify(networkJson),
+          success :function(result) {
+              console.log("Success!");
+         }
+      });
 
 });
 
