@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,8 +16,6 @@ public class NetworkHashrateService {
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;
-
-
 
     public List<NetworkHashrate> getAllNetworks(){
 
@@ -37,4 +34,7 @@ public class NetworkHashrateService {
 
         return poolsList;
     }
+
+
+
 }

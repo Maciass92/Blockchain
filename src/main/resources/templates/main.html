@@ -15,9 +15,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
-    <script type="text/javascript" src="../js/getNetworkData.js" th:src="@{/js/getNetworkData.js}"></script>
-    <script type="text/javascript" src="../js/getPoolsData.js" th:src="@{/js/getPoolsData.js}"></script>
-
 
 </head>
 
@@ -49,9 +46,8 @@
                         </table>
 
                     </div>
-                    <button type="button" class="btn btn-success" th:onclick="'javascript:getNetworkData();'">Networks!</button>
-                    <button type="button" class="btn btn-success" th:onclick="'javascript:getPoolsData();'">Pools!</button>
-
+                    <a href="#" class="btn btn-success" role="button" th:href="@{'/saveNetworkData'}">Networks!</a>
+                    <a href="#" class="btn btn-success" role="button" th:href="@{'/savePoolsData'}">Pools!</a>
                 </div>
             </div>
         </div>

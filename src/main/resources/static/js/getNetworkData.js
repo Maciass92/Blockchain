@@ -17,7 +17,7 @@ data.networks.forEach(function(network){
     xmlHttp.onreadystatechange = function() {
          if (xmlHttp.readyState == XMLHttpRequest.DONE){
              var result = xmlHttp.responseText;
-             network_hashrates.push({"Network_hashrate" : result, "id" : network_id});
+             network_hashrates.push({"Network_hashrate" : result, "Network_id" : network_id});
 
              console.log("Network hashrate: " + result);
          }
