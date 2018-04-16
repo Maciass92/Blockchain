@@ -31,17 +31,21 @@ data.networks.forEach(function(network){
 
     console.log(networkJson);
 
-    $.ajax({
-          type: "POST",
-          contentType : 'application/json; charset=utf-8',
-          dataType : 'json',
-          url: "/saveNetworkData",
-          async: false,
-          data: JSON.stringify(networkJson),
-          success :function(result) {
-              console.log("Success!");
-         }
-      });
+var myTimer = setInterval(function(){
+    if (jQuery.active == 0){
+        $.ajax({
+                  type: "POST",
+                  contentType : 'application/json; charset=utf-8',
+                  dataType : 'json',
+                  url: "/saveNetworkData",
+                  data: JSON.stringify(networkJson),
+                  success :function(result) {
+                      console.log("Success!");
+                 }
+              });
+        clearInterval(myTimer); // stop the interval once you the get calls finished and you send the ajax call
+    }
+}, 500);
 
 });
 

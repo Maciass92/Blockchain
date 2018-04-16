@@ -31,17 +31,14 @@ data.pools.forEach(function(pool){
 
         });
     }
-
 });
 
-
-var myTimer = setInterval((function(){
+var myTimer = setInterval(function(){
     if (jQuery.active == 0){
         $.ajax({
               type: "POST",
               contentType : 'application/json; charset=utf-8',
               dataType : 'json',
-              async: false,
               url: "/savePoolsData",
               data: JSON.stringify(pools_hashrates),
               success :function(result) {
@@ -50,11 +47,6 @@ var myTimer = setInterval((function(){
           });
         clearInterval(myTimer); // stop the interval once you the get calls finished and you send the ajax call
     }
-}, 10000));
-
-
-
-
-
+}, 500);
 });
 }
