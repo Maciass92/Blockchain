@@ -22,9 +22,7 @@ public class getDataController {
     @RequestMapping("/savePoolsData")
     public void getPoolsData(HttpServletResponse response) throws IOException, URISyntaxException {
 
-
-        //getDataService.getAllFilePathsInFolder();
-        getDataService.getPoolDataAndStoreToDB();
+        getDataService.connectToPoolAPIs();
 
         response.sendRedirect("");
     }

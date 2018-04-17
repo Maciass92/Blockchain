@@ -12,7 +12,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class NetworkHashrateService {
+public class FindAndDisplayDataService {
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;

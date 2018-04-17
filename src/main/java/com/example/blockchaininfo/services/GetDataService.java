@@ -70,81 +70,92 @@ public class GetDataService {
 
     public List<Path> getAllFilePathsInFolder() throws IOException, URISyntaxException {
 
-        /*
-        File folder = new File("src/main/resources/static/json/networks/pools");
-        File[] listOfFiles = folder.listFiles();
-
-        for(File f : listOfFiles) {
-            System.out.println(f.getPath());
-        }*/
-
         List<Path> listOfFiles = Files.walk(Paths.get(ClassLoader.getSystemResource("static/json/networks/pools/").toURI()))
                 .filter(Files::isRegularFile)
                 .collect(toList());
 
-        String myString = listOfFiles.get(0).toString();
-        String newString = myString.substring(myString.indexOf("static") - 1, myString.length());
-
-        System.out.println(newString);
-
         return listOfFiles;
     }
 
-    //List<PoolList>
-    public PoolList getPoolsListFromJson() throws IOException {
+    public List<PoolList> getPoolsListFromJson() throws IOException, URISyntaxException {
 
         ObjectMapper jsonMapper = new ObjectMapper();
         List<PoolList> poolListsList = new ArrayList<>();
 
-        //for(File f : this.getAllFilePathsInFolder()) {
+        for(Path path : this.getAllFilePathsInFolder()) {
 
-            InputStream jsonPoolsFile = new ClassPathResource("/static/json/networks/pools/turtlecoin-pools.json").getInputStream();
+            InputStream jsonPoolsFile = new ClassPathResource(this.pathToFormatedString(path)).getInputStream();
             PoolList poolList = jsonMapper.readValue(jsonPoolsFile, PoolList.class);
 
-            //poolListsList.add(poolList);
+            poolListsList.add(poolList);
 
             jsonPoolsFile.close();
-        //}
+        }
 
-        return poolList;
+        return poolListsList;
     }
 
-    public void getPoolDataAndStoreToDB() throws IOException{
+    public String pathToFormatedString(Path path){
+
+        String myString = path.toString();
+        String newString = myString.substring(myString.indexOf("static") - 1, myString.length());
+
+        return newString;
+    }
+
+    public void connectToPoolAPIs() throws IOException, URISyntaxException{
 
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
                 HttpClientBuilder.create().build());
-        clientHttpRequestFactory.setConnectTimeout(5000);
-        clientHttpRequestFactory.setReadTimeout(5000);
+        clientHttpRequestFactory.setConnectTimeout(500);
+        clientHttpRequestFactory.setReadTimeout(500);
         RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
 
+        List<PoolList> poolListList = this.getPoolsListFromJson();
+
+        for(PoolList poolList : poolListList){
+
+            this.storePoolDataToDB(poolList, restTemplate);
+        }
+    }
+
+    public void storePoolDataToDB(PoolList poolList, RestTemplate restTemplate) throws IOException{
+
         OffsetDateTime date = OffsetDateTime.now();
-        PoolList poolList = this.getPoolsListFromJson();
 
-            for(int i = 0; i < this.getPoolsListFromJson().getPoolList().size(); i++) {
+        for (int i = 0; i < poolList.getPoolList().size(); i++) {
 
-                    String jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);;
+            //String jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);
 
-                /*try {
-                    jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);
-                } catch (ResourceAccessException e){
-                    continue;
-                }*/
-
-                PoolDef poolDef = new PoolDef();
-                poolDef.setDate_from(date);
-                poolDef.setName(poolList.getPoolList().get(i).getName());
-                poolDef.setId(new Long(i + 1));
-
-                poolDefRepository.save(poolDef);
-
-                PoolHashrate poolHashrate = new PoolHashrate();
-                poolHashrate.setHashrate(this.processJsonString(jsonString, poolList.getPoolList().get(i)));
-                poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(new Long(1)).get());
-                poolHashrate.setPoolDef(poolDef);
-                poolHashrate.setId(new Long(i + 1));
-
-                poolHashrateRepository.save(poolHashrate);
+            String jsonString;
+            try {
+                jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);
+            } catch (ResourceAccessException e){
+                continue;
             }
+
+
+            PoolDef poolDef = new PoolDef();
+            poolDef.setDate_from(date);
+            poolDef.setName(poolList.getPoolList().get(i).getName());
+//            poolDef.setId(poolDefRepository.findByName(poolList.getPoolList().get(i).getName()).get().getId());
+
+            System.out.println("Iteracja: " + i);
+            System.out.println("Id pool defa: " + poolDef.getId());
+
+            poolDefRepository.save(poolDef);
+
+            PoolHashrate poolHashrate = new PoolHashrate();
+            poolHashrate.setHashrate(this.processJsonString(jsonString, poolList.getPoolList().get(i)));
+            //todo how to assign id
+            poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(new Long(1)).get());
+            poolHashrate.setPoolDef(poolDef);
+       //     poolHashrate.setId(poolHashrateRepository.findByPoolId(poolDef.getId()).get().getId());
+
+            System.out.println("Id pool hashrate'a: " + poolHashrate.getId());
+
+            poolHashrateRepository.save(poolHashrate);
+        }
     }
 
     public double processJsonString(String string, PoolDefinition poolDefinition) throws IOException{

@@ -1,8 +1,7 @@
 package com.example.blockchaininfo.controllers;
 
-import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolHashrate;
-import com.example.blockchaininfo.services.NetworkHashrateService;
+import com.example.blockchaininfo.services.FindAndDisplayDataService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -10,11 +9,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,7 +24,7 @@ public class indexControllerTest {
     MockMvc mockMvc;
 
     @Mock
-    NetworkHashrateService networkHashrateService;
+    FindAndDisplayDataService networkHashrateService;
 
     @Before
     public void setUp() throws Exception {

@@ -12,4 +12,7 @@ public interface PoolHashrateRepository extends CrudRepository<PoolHashrate, Lon
 
     @Query("SELECT u FROM PoolHashrate u WHERE network_id = :id")
     List<PoolHashrate> findAllByNetworkId(@Param("id") Long id);
+
+    @Query("SELECT u FROM PoolHashrate u WHERE pool_id = :id")
+    Optional<PoolHashrate> findByPoolId(@Param("id") Long id);
 }

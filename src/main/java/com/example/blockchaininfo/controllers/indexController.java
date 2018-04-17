@@ -1,6 +1,6 @@
 package com.example.blockchaininfo.controllers;
 
-import com.example.blockchaininfo.services.NetworkHashrateService;
+import com.example.blockchaininfo.services.FindAndDisplayDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class indexController {
 
-    private final NetworkHashrateService netService;
+    private final FindAndDisplayDataService netService;
 
     @RequestMapping("")
     public String getAllNetworks(Model model){
