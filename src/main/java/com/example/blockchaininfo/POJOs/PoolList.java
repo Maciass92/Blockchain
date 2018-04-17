@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class PoolList {
 
-    List<PoolDefinition> poolList;
+    private List<PoolDefinition> poolList;
 }

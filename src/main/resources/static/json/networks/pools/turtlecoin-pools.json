@@ -1,5 +1,5 @@
 {
-    "pools" : [
+    "poolList" : [
         {
             "name" : "AtPool.party",
             "url" : "https://turtle.atpool.party/",
@@ -54,12 +54,7 @@
             "api" : "https://api.trtl.flashpool.club/",
             "type" : "forknote"
         },
-        {
-            "name" : "Mine2Gether.com",
-            "url" : "https://trtl.mine2gether.com/",
-            "api" : "https://trtl.mine2gether.com/api/",
-            "type" : "forknote"
-        },
+
         {
             "name" : "MineTRTL.us",
             "url" : "http://ny.minetrtl.us/",
@@ -85,11 +80,18 @@
             "type" : "forknote"
         },
         {
-            "name" : "TRTL.ninja",
-            "url" : "https://trtl.ninja/",
-            "api" : "https://trtl.ninja/api/",
+            "name" : "Mine2Gether.com",
+            "url" : "https://trtl.mine2gether.com/",
+            "api" : "https://trtl.mine2gether.com/api/",
             "type" : "forknote"
-        },       
+        },
+        {
+            "name" : "TurtlePool.space US",
+            "url" : "http://us.turtlepool.space/",
+            "api" : "http://us.turtlepool.space/api/",
+            "type" : "forknote"
+        },
+
         {
             "name" : "TurtlePool.space EU",
             "url" : "http://eu.turtlepool.space/",
@@ -102,12 +104,7 @@
             "api" : "http://hk.turtlepool.space/api/",
             "type" : "forknote"
         },
-        {
-            "name" : "TurtlePool.space US",
-            "url" : "http://us.turtlepool.space/",
-            "api" : "http://us.turtlepool.space/api/",
-            "type" : "forknote"
-        },
+
         {
             "name" : "UniPool",
             "url" : "https://trtl.unipool.pro/",

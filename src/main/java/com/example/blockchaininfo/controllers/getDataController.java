@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 
 @RequiredArgsConstructor
@@ -19,8 +20,11 @@ public class getDataController {
     private final GetDataService getDataService;
 
     @RequestMapping("/savePoolsData")
-    public void getPoolsData(HttpServletResponse response) throws IOException{
+    public void getPoolsData(HttpServletResponse response) throws IOException, URISyntaxException {
 
+
+        //getDataService.getAllFilePathsInFolder();
+        getDataService.getPoolDataAndStoreToDB();
 
         response.sendRedirect("");
     }
@@ -28,9 +32,7 @@ public class getDataController {
     @RequestMapping("/saveNetworkData")
     public void getNetworkData(HttpServletResponse response) throws IOException {
 
-        getDataService.getDataAndStoreToDB();
-
-        getDataService.getAllFilePathsInFolder();
+        getDataService.getNetworkDataAndStoreToDB();
 
         response.sendRedirect("");
     }
