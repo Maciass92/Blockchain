@@ -176,7 +176,7 @@ public class GetDataService {
 
         PoolHashrate poolHashrate = new PoolHashrate();
         poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(jsonString, poolList.getPoolList().get(i)));
-        poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(new Long(id)).get());
+        poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(Long.valueOf(id)).get());
         poolHashrate.setPoolDef(poolDef);
 
         poolHashrateRepository.save(poolHashrate);

@@ -5,6 +5,8 @@ import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,11 +19,9 @@ public class FindAndDisplayDataService {
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;
 
-    public List<NetworkHashrate> getAllNetworks(){
+    public Page<NetworkHashrate> getAllNetworks(Pageable pageable){
 
-        List<NetworkHashrate> networkHashrateList = new ArrayList<>();
-
-        networkHashrateRepository.findAll().iterator().forEachRemaining(networkHashrateList::add);
+        Page<NetworkHashrate> networkHashrateList = networkHashrateRepository.findAll(pageable);
 
         return networkHashrateList;
     }
