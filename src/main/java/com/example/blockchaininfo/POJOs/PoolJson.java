@@ -6,7 +6,7 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class PoolJSON {
+public class PoolJson {
 
     @JsonProperty("pool")
     private PoolForknote poolForknote;
