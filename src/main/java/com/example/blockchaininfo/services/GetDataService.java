@@ -12,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.lang.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,28 +46,55 @@ public class GetDataService {
 
         InputStream jsonNetworkDetailsFile = new ClassPathResource("/static/json/networks/network-list.json").getInputStream();
         NetworkList networkList = jsonMapper.readValue(jsonNetworkDetailsFile, NetworkList.class);
-
         jsonNetworkDetailsFile.close();
 
         return networkList;
     }
 
-    public void getNetworkDataAndStoreToDB() throws IOException{
+    @Scheduled(fixedRate = 10000)
+    public void storeData() throws IOException, URISyntaxException{
 
-        RestTemplate restTemplate = new RestTemplate();
         OffsetDateTime date = OffsetDateTime.now();
 
-        for(NetworkDef networkDef : this.getNetworkListFromJson().getNetworkList()){
+        for(NetworkDefinition networkDefinition : this.getNetworkListFromJson().getNetworkList()){
 
-            String hashrate_as_string = restTemplate.getForObject(networkDef.getApi_url(), String.class);
+            String hashrateFromAPI;
 
-            NetworkHashrate networkHashrate = new NetworkHashrate();
-            networkHashrate.setId(networkDef.getId());
-            networkHashrate.setHashrate(Double.parseDouble(hashrate_as_string));
-            networkHashrate.setRep_date(date);
+            try {
+                hashrateFromAPI = this.getJsonFromAPI(networkDefinition.getApi_url());
+            } catch (HttpServerErrorException e){
+                break;
+            }
 
-            networkHashrateRepository.save(networkHashrate);
+            this.saveNetworkHashrateNewEntity(hashrateFromAPI, date);
+
+            Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
+            if(networkHashrateOptional.isPresent()){
+                Long networkId = networkHashrateOptional.get().getId();
+                this.connectToPoolAPIAndStoreData(networkId);
+            }
         }
+    }
+
+    public String getJsonFromAPI(String url){
+
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
+        clientHttpRequestFactory.setConnectTimeout(1000);
+        clientHttpRequestFactory.setReadTimeout(1000);
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
+        String helperString = restTemplate.getForObject(url, String.class);
+
+        return helperString;
+    }
+
+    public void saveNetworkHashrateNewEntity(String hashrate_as_string, OffsetDateTime date){
+
+        NetworkHashrate networkHashrate = new NetworkHashrate();
+        networkHashrate.setHashrate(Double.parseDouble(hashrate_as_string));
+        networkHashrate.setRep_date(date);
+
+        networkHashrateRepository.save(networkHashrate);
     }
 
     public List<Path> getAllFilePathsInFolder() throws IOException, URISyntaxException {
@@ -84,7 +113,7 @@ public class GetDataService {
 
         for(Path path : this.getAllFilePathsInFolder()) {
 
-            InputStream jsonPoolsFile = new ClassPathResource(this.pathToFormatedString(path)).getInputStream();
+            InputStream jsonPoolsFile = new ClassPathResource(this.truncateFilePath(path)).getInputStream();
             PoolList poolList = jsonMapper.readValue(jsonPoolsFile, PoolList.class);
 
             poolListsList.add(poolList);
@@ -95,80 +124,77 @@ public class GetDataService {
         return poolListsList;
     }
 
-    public String pathToFormatedString(Path path){
+    public String truncateFilePath(Path path){
 
-        String myString = path.toString();
-        String newString = myString.substring(myString.indexOf("static") - 1, myString.length());
+        String helperString = path.toString();
+        String truncatedFilePath = helperString.substring(helperString.indexOf("static") - 1, helperString.length());
 
-        return newString;
+        return truncatedFilePath;
     }
 
-    public void connectToPoolAPIs() throws IOException, URISyntaxException{
-
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
-                HttpClientBuilder.create().build());
-        clientHttpRequestFactory.setConnectTimeout(500);
-        clientHttpRequestFactory.setReadTimeout(500);
-        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+    public void connectToPoolAPIAndStoreData(Long id) throws IOException, URISyntaxException{
 
         List<PoolList> poolListList = this.getPoolsListFromJson();
 
-        for(PoolList poolList : poolListList){
-
-            this.storePoolDataToDB(poolList, restTemplate);
-        }
+        for(PoolList poolList : poolListList)
+            this.storePoolDataToDB(poolList, id);
     }
 
-    public void storePoolDataToDB(PoolList poolList, RestTemplate restTemplate) throws IOException{
-
-        OffsetDateTime date = OffsetDateTime.now();
+    public void storePoolDataToDB(PoolList poolList, Long id) throws IOException{
 
         for (int i = 0; i < poolList.getPoolList().size(); i++) {
 
-            //String jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);
+            OffsetDateTime date = OffsetDateTime.now();
 
             String jsonString;
             try {
-                jsonString = restTemplate.getForObject(this.appendPoolApiURL(poolList.getPoolList().get(i)), String.class);
+                jsonString = this.getJsonFromAPI(this.appendPoolApiURL(poolList.getPoolList().get(i)));
             } catch (ResourceAccessException e){
                 continue;
-            }
+            } catch (HttpServerErrorException e2){
+                continue;
+            }/* catch (HttpClientErrorException e3){
+                continue;
+            }*/
 
+            PoolDef poolDef = this.savePoolDefNewEntity(date, poolList, i);
 
-            PoolDef poolDef = new PoolDef();
-            poolDef.setDate_from(date);
-            poolDef.setName(poolList.getPoolList().get(i).getName());
-//            poolDef.setId(poolDefRepository.findByName(poolList.getPoolList().get(i).getName()).get().getId());
-
-            System.out.println("Iteracja: " + i);
-            System.out.println("Id pool defa: " + poolDef.getId());
-
-            poolDefRepository.save(poolDef);
-
-            PoolHashrate poolHashrate = new PoolHashrate();
-            poolHashrate.setHashrate(this.processJsonString(jsonString, poolList.getPoolList().get(i)));
-            //todo how to assign id
-            poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(new Long(1)).get());
-            poolHashrate.setPoolDef(poolDef);
-       //     poolHashrate.setId(poolHashrateRepository.findByPoolId(poolDef.getId()).get().getId());
-
-            System.out.println("Id pool hashrate'a: " + poolHashrate.getId());
-
-            poolHashrateRepository.save(poolHashrate);
+            this.savePoolHashrateNewEntity(jsonString, poolList, poolDef, id, i);
         }
     }
 
-    public double processJsonString(String string, PoolDefinition poolDefinition) throws IOException{
+    public PoolDef savePoolDefNewEntity(OffsetDateTime date, PoolList poolList, int i){
+
+        PoolDef poolDef = new PoolDef();
+        poolDef.setDate_from(date);
+        poolDef.setName(poolList.getPoolList().get(i).getName());
+
+        poolDefRepository.save(poolDef);
+
+        return poolDef;
+    }
+
+    public void savePoolHashrateNewEntity(String jsonString, PoolList poolList, PoolDef poolDef, Long id, int i) throws IOException{
+
+        PoolHashrate poolHashrate = new PoolHashrate();
+        poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(jsonString, poolList.getPoolList().get(i)));
+        poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(new Long(id)).get());
+        poolHashrate.setPoolDef(poolDef);
+
+        poolHashrateRepository.save(poolHashrate);
+    }
+
+    public double retrieveHashrateFromJsonString(String string, PoolDefinition poolDefinition) throws IOException{
 
         ObjectMapper jsonMapper = new ObjectMapper();
         double hashrate;
 
-        Gett gett = jsonMapper.readValue(string, Gett.class);
+        PoolJSON poolJSON = jsonMapper.readValue(string, PoolJSON.class);
 
         if(poolDefinition.getType().equals("forknote"))
-            hashrate = gett.getPool().getHashrate();
+            hashrate = poolJSON.getPoolForknote().getHashrate();
         else
-            hashrate = gett.getPool_statistics().getHashRate();
+            hashrate = poolJSON.getPool_nodeJs().getHashRate();
 
         return hashrate;
     }
@@ -184,5 +210,4 @@ public class GetDataService {
 
         return appended_api.toString();
     }
-
 }

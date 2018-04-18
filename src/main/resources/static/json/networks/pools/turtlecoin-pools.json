@@ -116,6 +116,12 @@
             "url" : "https://z-pool.com/",
             "api" : "https://z-pool.com/api/",
             "type" : "forknote"
+        },
+        {
+            "name" : "TRTL.ninja",
+            "url" : "https://trtl.ninja/",
+            "api" : "https://trtl.ninja/api/",
+            "type" : "forknote"
         }
     ]
 }

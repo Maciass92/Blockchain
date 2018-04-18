@@ -3,7 +3,7 @@ package com.example.blockchaininfo.POJOs;
 import lombok.Data;
 
 @Data
-public class NetworkDef {
+public class NetworkDefinition {
 
     private String name;
     private String url;

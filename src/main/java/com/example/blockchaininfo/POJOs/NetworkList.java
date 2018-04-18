@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class NetworkList {
 
-    private List<NetworkDef> networkList;
+    private List<NetworkDefinition> networkList;
 }
