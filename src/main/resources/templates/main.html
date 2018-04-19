@@ -17,6 +17,16 @@
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
     <script type="text/javascript" src="../js/contentRefresh.js" th:src="@{/js/contentRefresh.js}"></script>
 
+    <!-- Datatables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
+
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
+
+
+    <script type="text/javascript" src="../js/sortTable.js" th:src="@{/js/sortTable.js}"></script>
 
 </head>
 
@@ -28,7 +38,7 @@
             <div class="panel panel-primary">
                 <div class="panel-body">
                     <div class="table-responsive" id="main-content" th:fragment="table-content">
-                        <table class="table table-hover ">
+                        <table class="table table-hover">
 
                             <thead class="thead-inverse">
                             <tr>
@@ -38,14 +48,11 @@
                             </tr>
                             </thead>
 
-                            <tbody>
                             <tr style="cursor: pointer;" th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
                                 <td class="text-center" th:text="${networkHashrate.id}"> Sample id</td>
                                 <td class="text-center" th:text="${networkHashrate.rep_date}">Sample rep-date</td>
                                 <td class="text-center" th:text="${networkHashrate.hashrate}">Sample hashrate</td>
-                                </td>
                             </tr>
-                            </tbody>
                         </table>
 
                             <div class="text-center" id="stat">
