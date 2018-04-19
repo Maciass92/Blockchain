@@ -15,7 +15,6 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
 
 </head>
@@ -50,17 +49,17 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-sm-5">
+                        <div class="text-center" id="stat">
                             <div class="pagination"><p>Displaying <span class="badge" th:text="${page.size * (page.number-1) + 1}"></span> -
                                 <span class="badge" th:text="${page.lastPage ? page.totalElements : page.size * (page.number-1)+ page.size}"></span> of
                                 <span class="badge" th:text="${page.totalElements}"></span> total records</p>
                             </div>
                         </div>
-
-                        <div class="col-sm-7">
+                    </div>
 
                             <!-- Pagination Bar -->
-                            <div th:fragment='paginationbar'>
+                        <div th:fragment='paginationbar'>
+                            <div class="row">
                                 <div class="text-center">
                                     <ul class='pagination pagination-centered'>
                                         <li th:class="${page.firstPage}?'disabled':''">
@@ -95,7 +94,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                </div>
             </div>
         </div>
     </div>
