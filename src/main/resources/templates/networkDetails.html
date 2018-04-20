@@ -34,19 +34,18 @@
                         <tr>
                             <th class="col-md-2 text-center">Pool name</th>
                             <th class="col-md-2 text-center">Date from</th>
-                            <th class="col-md-2 text-center">Hashrate</th>
+                            <th class="col-md-2 text-center">Hashrate [KH/s]</th>
                         </tr>
                         </thead>
 
                         <tbody>
                         <tr th:each="poolHashrate : ${poolHashrates}">
                             <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
-                            <td class="text-center" th:text="${poolHashrate.poolDef.date_from}">Maven Street 10, Glasgow</td>
-                            <td class="text-center" th:text="${poolHashrate.hashrate}">999-999-999</td>
+                            <td class="text-center" th:text="${@findAndDisplayDataService.formatDate(poolHashrate.poolDef.date_from)}">Maven Street 10, Glasgow</td>
+                            <td class="text-center" th:text="${@findAndDisplayDataService.formatHashrate(poolHashrate.hashrate)}">999-999-999</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>

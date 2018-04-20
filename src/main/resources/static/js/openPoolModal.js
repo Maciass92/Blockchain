@@ -8,7 +8,7 @@ $.ajax({
     $("#personalModal").modal('show');
     $('#poolTable').DataTable({
             paging: false,
-            info: false
+            info: false,
             "aoColumns": [
                        { "orderSequence": [ "asc", "desc" ] },
                        { "orderSequence": [ "asc", "desc" ] },

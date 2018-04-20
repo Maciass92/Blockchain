@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,14 @@ public class FindAndDisplayDataService {
         return poolsList;
     }
 
+    public String formatDate(OffsetDateTime dateTime){
 
+        return DateTimeFormatter.ofPattern("dd.MM.yyyy - H:m:s:SSS").format(dateTime);
+    }
+
+    public double formatHashrate(double hashrate){
+
+        return hashrate/1000.0;
+    }
 
 }

@@ -14,8 +14,6 @@
 
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
-    <script type="text/javascript" src="../js/contentRefresh.js" th:src="@{/js/contentRefresh.js}"></script>
 
     <!-- Datatables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap.min.css"/>
@@ -23,7 +21,8 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 
-    <script type="text/javascript" src="../js/sortTable.js" th:src="@{/js/sortTable.js}"></script>
+    <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
+    <script type="text/javascript" src="../js/contentRefresh.js" th:src="@{/js/contentRefresh.js}"></script>
 
 </head>
 
@@ -35,21 +34,26 @@
             <div class="panel panel-primary">
                 <div class="panel-body">
                     <div class="table-responsive" id="main-content" th:fragment="table-content">
-                        <table class="table table-hover">
+
+                        <script type="text/javascript" src="../js/sortTable.js" th:src="@{/js/sortTable.js}"></script>
+
+                        <table class="table table-hover" id="main-table">
 
                             <thead class="thead-inverse">
                             <tr>
                                 <th class="col-md-2 text-center">Network Id</th>
-                                <th class="col-md-2 text-center">Rep_date</th>
-                                <th class="col-md-2 text-center">Hashrate</th>
+                                <th class="col-md-2 text-center">Rep date</th>
+                                <th class="col-md-2 text-center">Hashrate [KH/s]</th>
                             </tr>
                             </thead>
 
+                            <tbody>
                             <tr style="cursor: pointer;" th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
                                 <td class="text-center" th:text="${networkHashrate.id}"> Sample id</td>
-                                <td class="text-center" th:text="${networkHashrate.rep_date}">Sample rep-date</td>
-                                <td class="text-center" th:text="${networkHashrate.hashrate}">Sample hashrate</td>
+                                <td class="text-center" th:text="${@findAndDisplayDataService.formatDate(networkHashrate.rep_date)}">Sample rep-date</td>
+                                <td class="text-center" th:text="${@findAndDisplayDataService.formatHashrate(networkHashrate.hashrate)}">Sample hashrate</td>
                             </tr>
+                            </tbody>
                         </table>
 
                             <div class="text-center" id="stat">
