@@ -9,6 +9,11 @@ $.ajax({
     $('#poolTable').DataTable({
             paging: false,
             info: false
+            "aoColumns": [
+                       { "orderSequence": [ "asc", "desc" ] },
+                       { "orderSequence": [ "asc", "desc" ] },
+                       { "orderSequence": [ "desc", "asc" ] }
+                         ]
     });
     }
 });
