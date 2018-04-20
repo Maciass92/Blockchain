@@ -1,4 +1,5 @@
 setInterval("contentRefresh();", 10000 );
+
 function contentRefresh() {
     $.ajax({
         url: "/refresh",
@@ -6,4 +7,4 @@ function contentRefresh() {
              $("#main-content").html(data);
             }
     });
-}
+};

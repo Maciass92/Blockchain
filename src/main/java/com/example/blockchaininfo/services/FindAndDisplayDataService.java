@@ -39,7 +39,7 @@ public class FindAndDisplayDataService {
 
     public String formatDate(OffsetDateTime dateTime){
 
-        return DateTimeFormatter.ofPattern("dd.MM.yyyy - H:m:s:SSS").format(dateTime);
+        return DateTimeFormatter.ofPattern("dd.MM.yyyy - HH:mm:ss:SSS").format(dateTime);
     }
 
     public double formatHashrate(double hashrate){

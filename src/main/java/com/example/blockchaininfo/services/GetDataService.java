@@ -57,25 +57,25 @@ public class GetDataService {
 
         for(NetworkDefinition networkDefinition : this.getNetworkListFromJson().getNetworkList()){
 
-            String hashrateFromAPI;
+            String hashrateFromApi;
 
             try {
-                hashrateFromAPI = this.getJsonFromAPI(networkDefinition.getApi_url());
+                hashrateFromApi = this.getJsonFromApi(networkDefinition.getApi_url());
             } catch (HttpServerErrorException e){
                 break;
             }
 
-            this.saveNetworkHashrateNewEntity(hashrateFromAPI, date);
+            this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
 
             Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
             if(networkHashrateOptional.isPresent()){
                 Long networkId = networkHashrateOptional.get().getId();
-                this.connectToPoolAPIAndStoreData(networkId);
+                this.connectToPoolApiAndStoreData(networkId);
             }
         }
     }
 
-    public String getJsonFromAPI(String url){
+    public String getJsonFromApi(String url){
 
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
         clientHttpRequestFactory.setConnectTimeout(1000);
@@ -130,7 +130,7 @@ public class GetDataService {
         return truncatedFilePath;
     }
 
-    public void connectToPoolAPIAndStoreData(Long id) throws IOException, URISyntaxException{
+    public void connectToPoolApiAndStoreData(Long id) throws IOException, URISyntaxException{
 
         List<PoolList> poolListList = this.getPoolsListFromJson();
 
@@ -146,7 +146,7 @@ public class GetDataService {
 
             String jsonString;
             try {
-                jsonString = this.getJsonFromAPI(this.appendPoolApiUrl(poolList.getPoolList().get(i)));
+                jsonString = this.getJsonFromApi(this.appendPoolApiUrl(poolList.getPoolList().get(i)));
             } catch (ResourceAccessException e){
                 continue;
             } catch (HttpServerErrorException e2){
