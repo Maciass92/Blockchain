@@ -107,19 +107,19 @@ public class GetDataService {
 
     public List<PoolList> getPoolsListFromJson() throws IOException, URISyntaxException {
 
-        List<PoolList> poolListsList = new ArrayList<>();
+        List<PoolList> listOfPoolLists = new ArrayList<>();
 
         for(Path path : this.getAllFilePathsInFolder()) {
 
             InputStream jsonPoolsFile = new ClassPathResource(this.truncateFilePath(path)).getInputStream();
             PoolList poolList = this.jsonMapper.readValue(jsonPoolsFile, PoolList.class);
 
-            poolListsList.add(poolList);
+            listOfPoolLists.add(poolList);
 
             jsonPoolsFile.close();
         }
 
-        return poolListsList;
+        return listOfPoolLists;
     }
 
     public String truncateFilePath(Path path){
@@ -132,9 +132,9 @@ public class GetDataService {
 
     public void connectToPoolApiAndStoreData(Long id) throws IOException, URISyntaxException{
 
-        List<PoolList> poolListList = this.getPoolsListFromJson();
+        List<PoolList> listOfPoolLists = this.getPoolsListFromJson();
 
-        for(PoolList poolList : poolListList)
+        for(PoolList poolList : listOfPoolLists)
             this.storePoolDataToDB(poolList, id);
     }
 
