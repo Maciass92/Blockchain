@@ -62,17 +62,23 @@ public class GetDataService {
             try {
                 hashrateFromApi = this.getJsonFromApi(networkDefinition.getApi_url());
             } catch (HttpServerErrorException e){
+                System.out.println("Server error: " + e);
+                break;
+            } catch (ResourceAccessException e2){
+                System.out.println("Server error: "+ e2);
                 break;
             }
 
             this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
-
-            Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
-            if(networkHashrateOptional.isPresent()){
-                Long networkId = networkHashrateOptional.get().getId();
-                this.connectToPoolApiAndStoreData(networkId);
-            }
+            this.connectToPoolApiAndStoreData(retrieveNetworkIdForPoolDefinition(date));
         }
+    }
+
+    public Long retrieveNetworkIdForPoolDefinition(OffsetDateTime date){
+
+        Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
+
+        return networkHashrateOptional.isPresent() ? networkHashrateOptional.get().getId() : null;
     }
 
     public String getJsonFromApi(String url){
@@ -125,9 +131,8 @@ public class GetDataService {
     public String truncateFilePath(Path path){
 
         String helperString = path.toString();
-        String truncatedFilePath = helperString.substring(helperString.indexOf("static") - 1, helperString.length());
 
-        return truncatedFilePath;
+        return helperString.substring(helperString.indexOf("static") - 1, helperString.length());
     }
 
     public void connectToPoolApiAndStoreData(Long id) throws IOException, URISyntaxException{
@@ -151,9 +156,7 @@ public class GetDataService {
                 continue;
             } catch (HttpServerErrorException e2){
                 continue;
-            }/* catch (HttpClientErrorException e3){
-                continue;
-            }*/
+            }
 
             PoolDef poolDef = this.savePoolDefNewEntity(date, poolList, i);
 
@@ -184,35 +187,20 @@ public class GetDataService {
 
     public double retrieveHashrateFromJsonString(String string, PoolDefinition poolDefinition) throws IOException{
 
-        double hashrate;
-
         PoolJson poolJson = this.jsonMapper.readValue(string, PoolJson.class);
 
-        if(checkIfPoolIsForknoteType(poolDefinition))
-            hashrate = poolJson.getPoolForknote().getHashrate();
-        else
-            hashrate = poolJson.getPool_nodeJs().getHashRate();
-
-        return hashrate;
+        return checkIfPoolIsForknoteType(poolDefinition) ? poolJson.getPoolForknote().getHashrate() : poolJson.getPool_nodeJs().getHashRate();
     }
 
     public String appendPoolApiUrl(PoolDefinition poolDefinition){
 
         StringBuilder appendedApi = new StringBuilder(poolDefinition.getApi());
 
-        if(checkIfPoolIsForknoteType(poolDefinition))
-            appendedApi.append("stats");
-        else
-            appendedApi.append("pool/stats");
-
-        return appendedApi.toString();
+        return checkIfPoolIsForknoteType(poolDefinition) ? appendedApi.append("stats").toString() : appendedApi.append("pool/stats").toString();
     }
 
     public boolean checkIfPoolIsForknoteType(PoolDefinition poolDefinition){
 
-        if(poolDefinition.getType().equals("forknote"))
-            return true;
-        else
-            return false;
+        return poolDefinition.getType().equals("forknote") ? true : false;
     }
 }
