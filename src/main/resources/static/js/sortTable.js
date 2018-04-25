@@ -1,7 +1,10 @@
 $(document).ready(function() {
     $('#main-table').DataTable({
-               paging: false,
-               info: false,
+               paging: true,
+               lengthChange: false,
+               pageLength: 20,
+               stateSave: true,
+               info: true,
                searching: false,
                "aoColumns": [
                  { "orderSequence": [ "asc", "desc" ] },

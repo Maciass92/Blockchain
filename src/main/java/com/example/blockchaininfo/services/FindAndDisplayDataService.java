@@ -21,9 +21,9 @@ public class FindAndDisplayDataService {
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;
 
-    public Page<NetworkHashrate> getAllNetworks(Pageable pageable){
+    public List<NetworkHashrate> getAllNetworks(){
 
-        Page<NetworkHashrate> networkHashrateList = networkHashrateRepository.findAll(pageable);
+        List<NetworkHashrate> networkHashrateList = networkHashrateRepository.findAll();
 
         return networkHashrateList;
     }
