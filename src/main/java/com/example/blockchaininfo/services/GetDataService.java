@@ -9,6 +9,7 @@ import com.example.blockchaininfo.repositories.PoolDefRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -32,6 +33,7 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class GetDataService {
@@ -62,10 +64,10 @@ public class GetDataService {
             try {
                 hashrateFromApi = this.getJsonFromApi(networkDefinition.getApi_url());
             } catch (HttpServerErrorException e){
-                System.out.println("Server error: " + e);
+                log.info("Network Server error e1: " + e);
                 break;
             } catch (ResourceAccessException e2){
-                System.out.println("Server error: "+ e2);
+                log.info("Network resource access exception: " + e2);
                 break;
             }
 
@@ -84,8 +86,8 @@ public class GetDataService {
     public String getJsonFromApi(String url){
 
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
-        clientHttpRequestFactory.setConnectTimeout(1000);
-        clientHttpRequestFactory.setReadTimeout(1000);
+        clientHttpRequestFactory.setConnectTimeout(1500);
+        clientHttpRequestFactory.setReadTimeout(1500);
         RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
 
         String helperString = restTemplate.getForObject(url, String.class);
@@ -153,8 +155,10 @@ public class GetDataService {
             try {
                 jsonString = this.getJsonFromApi(this.appendPoolApiUrl(poolList.getPoolList().get(i)));
             } catch (ResourceAccessException e){
+                log.info("Pool resource access exception: " + e);
                 continue;
             } catch (HttpServerErrorException e2){
+                log.info("Pool server error: " + e2 + " - > on " + poolList.getPoolList().get(i).getApi());
                 continue;
             }
 

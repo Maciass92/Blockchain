@@ -1,5 +1,5 @@
 {
-    "poolList" : [
+    "pools" : [
         {
             "name" : "AtPool.party",
             "url" : "https://turtle.atpool.party/",
@@ -19,6 +19,12 @@
             "type" : "node.js"
         },
         {
+            "name" : "Block Chain Era",
+            "url" : "https://trtl.blockchainera.net/",
+            "api" : "https://blocks.turtle.link/pool/trtl.blockchainera.net/",
+            "type" : "forknote"
+        },
+        {
             "name" : "ChallengeCoin.io",
             "url" : "http://turtlepower.challengecoin.io/",
             "api" : "https://blocks.turtle.link/pool/turtlepower.challengecoin.io/",
@@ -31,9 +37,21 @@
             "type" : "forknote"
         },
         {
+            "name" : "CryptoAsiaPool.com",
+            "url" : "http://trtl.cryptoasiapool.com/",
+            "api" : "http://trtl.cryptoasiapool.com:8117/",
+            "type" : "forknote"
+        },
+        {
             "name" : "CryptoKnight.cc",
             "url" : "https://cryptoknight.cc/turtle/",
             "api" : "https://cryptoknight.cc/rpc/turtle/",
+            "type" : "forknote"
+        },
+        {
+            "name" : "CryptoNight.nl",
+            "url" : "https://trtl.cryptonight.nl/",
+            "api" : "https://trtlpool.cryptonight.nl/",
             "type" : "forknote"
         },
         {
@@ -54,7 +72,12 @@
             "api" : "https://api.trtl.flashpool.club/",
             "type" : "forknote"
         },
-
+        {
+            "name" : "Mine2Gether.com",
+            "url" : "https://trtl.mine2gether.com/",
+            "api" : "https://trtl.mine2gether.com/api/",
+            "type" : "forknote"
+        },
         {
             "name" : "MineTRTL.us",
             "url" : "http://ny.minetrtl.us/",
@@ -74,24 +97,23 @@
             "type" : "node.js"
         },
         {
+            "name" : "SlowAndSteady.fun",
+            "url" : "http://slowandsteady.fun/",
+            "api" : "http://slowandsteady.fun:8119/",
+            "type" : "forknote"
+        },
+        {
             "name" : "SpacePools.org",
             "url" : "https://turtle.spacepools.org/",
             "api" : "https://turtle.spacepools.org/api/",
             "type" : "forknote"
         },
         {
-            "name" : "Mine2Gether.com",
-            "url" : "https://trtl.mine2gether.com/",
-            "api" : "https://trtl.mine2gether.com/api/",
+            "name" : "TRTL.ninja",
+            "url" : "https://trtl.ninja/",
+            "api" : "https://trtl.ninja/api/",
             "type" : "forknote"
         },
-        {
-            "name" : "TurtlePool.space US",
-            "url" : "http://us.turtlepool.space/",
-            "api" : "http://us.turtlepool.space/api/",
-            "type" : "forknote"
-        },
-
         {
             "name" : "TurtlePool.space EU",
             "url" : "http://eu.turtlepool.space/",
@@ -104,7 +126,12 @@
             "api" : "http://hk.turtlepool.space/api/",
             "type" : "forknote"
         },
-
+        {
+            "name" : "TurtlePool.space US",
+            "url" : "http://us.turtlepool.space/",
+            "api" : "http://us.turtlepool.space/api/",
+            "type" : "forknote"
+        },
         {
             "name" : "UniPool",
             "url" : "https://trtl.unipool.pro/",
@@ -115,12 +142,6 @@
             "name" : "Zpool.com",
             "url" : "https://z-pool.com/",
             "api" : "https://z-pool.com/api/",
-            "type" : "forknote"
-        },
-        {
-            "name" : "TRTL.ninja",
-            "url" : "https://trtl.ninja/",
-            "api" : "https://trtl.ninja/api/",
             "type" : "forknote"
         }
     ]
