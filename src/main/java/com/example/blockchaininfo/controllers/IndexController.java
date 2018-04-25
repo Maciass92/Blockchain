@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Controller
-public class indexController {
+public class IndexController {
 
     private final FindAndDisplayDataService netService;
 
@@ -37,7 +37,6 @@ public class indexController {
 
         return "main :: table-content";
     }
-
 
     @RequestMapping("/{id}")
     public String getNetworkDetails(Model model, @PathVariable String id){

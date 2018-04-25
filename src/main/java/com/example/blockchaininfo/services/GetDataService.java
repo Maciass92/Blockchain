@@ -1,6 +1,6 @@
 package com.example.blockchaininfo.services;
 
-import com.example.blockchaininfo.POJOs.*;
+import com.example.blockchaininfo.pojos.*;
 import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolDef;
 import com.example.blockchaininfo.model.PoolHashrate;
@@ -99,7 +99,7 @@ public class GetDataService {
 
         NetworkHashrate networkHashrate = new NetworkHashrate();
         networkHashrate.setHashrate(Double.parseDouble(hashrate_as_string));
-        networkHashrate.setRep_date(date);
+        networkHashrate.setRepDate(date);
 
         networkHashrateRepository.save(networkHashrate);
     }
@@ -171,7 +171,7 @@ public class GetDataService {
     public PoolDef savePoolDefNewEntity(OffsetDateTime date, PoolList poolList, int i){
 
         PoolDef poolDef = new PoolDef();
-        poolDef.setDate_from(date);
+        poolDef.setDateFrom(date);
         poolDef.setName(poolList.getPoolList().get(i).getName());
 
         poolDefRepository.save(poolDef);

@@ -50,7 +50,7 @@
                             <tbody>
                             <tr style="cursor: pointer;" th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
                                 <td class="text-center" th:text="${networkHashrate.id}"> Sample id</td>
-                                <td class="text-center" th:text="${@findAndDisplayDataService.formatDate(networkHashrate.rep_date)}">Sample rep-date</td>
+                                <td class="text-center" th:text="${@findAndDisplayDataService.formatDate(networkHashrate.repDate)}">Sample rep-date</td>
                                 <td class="text-center" th:text="${@findAndDisplayDataService.formatHashrate(networkHashrate.hashrate)}">Sample hashrate</td>
                             </tr>
                             </tbody>

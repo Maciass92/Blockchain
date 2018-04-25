@@ -1,4 +1,4 @@
-package com.example.blockchaininfo.POJOs;
+package com.example.blockchaininfo.pojos;
 
 import lombok.Data;
 

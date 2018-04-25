@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 
 public class indexControllerTest {
 
-    indexController indexController;
+    IndexController indexController;
     MockMvc mockMvc;
 
     @Mock
@@ -30,7 +30,7 @@ public class indexControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        indexController = new indexController(networkHashrateService);
+        indexController = new IndexController(networkHashrateService);
         mockMvc = MockMvcBuilders.standaloneSetup(indexController).build();
     }
 

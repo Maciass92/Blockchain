@@ -11,11 +11,11 @@ public class PoolDef {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private String name;
 
     @Column(name = "date_from", columnDefinition = "timestamp with time zone not null")
-    private OffsetDateTime date_from;
+    private OffsetDateTime dateFrom;
 
 }

@@ -13,10 +13,10 @@ public class NetworkHashrate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @Column(name = "rep_date", columnDefinition = "timestamp with time zone not null")
-    private OffsetDateTime rep_date;
+    private OffsetDateTime repDate;
 
     private double hashrate;
 }
