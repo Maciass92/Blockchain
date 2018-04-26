@@ -22,7 +22,7 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
 
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
-    <script type="text/javascript" src="../js/contentRefresh.js" th:src="@{/js/contentRefresh.js}"></script>
+<!--    <script type="text/javascript" src="../js/contentRefresh.js" th:src="@{/js/contentRefresh.js}"></script>-->
 
 </head>
 
@@ -49,9 +49,9 @@
 
                             <tbody>
                             <tr style="cursor: pointer;" th:each="networkHashrate : ${networkHashrates}" th:onclick="'javascript:openPoolModal(\''+ ${networkHashrate.id} + '\');'">
-                                <td class="text-center" th:text="${networkHashrate.id}"> Sample id</td>
-                                <td class="text-center" th:text="${@findAndDisplayDataService.formatDate(networkHashrate.repDate)}">Sample rep-date</td>
-                                <td class="text-center" th:text="${@findAndDisplayDataService.formatHashrate(networkHashrate.hashrate)}">Sample hashrate</td>
+                                <td class="text-center" id="hashrateId" th:text="${networkHashrate.id}"> Sample id</td>
+                                <td class="text-center" id="repDate" th:text="${@findAndDisplayDataService.formatDate(networkHashrate.repDate)}">Sample rep-date</td>
+                                <td class="text-center" id="hashrate" th:text="${@findAndDisplayDataService.formatHashrate(networkHashrate.hashrate)}">Sample hashrate</td>
                             </tr>
                             </tbody>
                         </table>

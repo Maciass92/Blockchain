@@ -1,6 +1,7 @@
 package com.example.blockchaininfo.controllers;
 
 import com.example.blockchaininfo.services.FindAndDisplayDataService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,12 +22,11 @@ public class IndexController {
         return "main";
     }
 
+    @ResponseBody
     @RequestMapping("/refresh")
-    public String refreshPage(Model model){
+    public String refreshPage(Model model) throws JsonProcessingException {
 
-        model.addAttribute("networkHashrates", netService.getAllNetworks());
-
-        return "main :: table-content";
+        return netService.returnNetworkAsJson();
     }
 
     @RequestMapping("/{id}")

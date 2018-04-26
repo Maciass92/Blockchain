@@ -4,6 +4,8 @@ import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +37,13 @@ public class FindAndDisplayDataService {
         poolHashrateRepository.findAllByNetworkId(id).iterator().forEachRemaining(poolsList::add);
 
         return poolsList;
+    }
+
+    public String returnNetworkAsJson() throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.writeValueAsString(this.getAllNetworks());
     }
 
     public String formatDate(OffsetDateTime dateTime){
