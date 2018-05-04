@@ -43,18 +43,12 @@ public class GetDataService {
     private final ObjectMapper jsonMapper;
     private final ExecutorService executorService;
 
-    private List<Future<PoolStatus>> futureList;
-    private List<PoolStatus> poolStatusList;
-
     public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
         this.poolDefRepository = poolDefRepository;
         this.poolHashrateRepository = poolHashrateRepository;
         this.jsonMapper = jsonMapper;
         this.executorService = Executors.newCachedThreadPool();
-
-        this.futureList = new ArrayList<>();
-        this.poolStatusList = this.poolStatusList();
     }
 
     public NetworkList getNetworkListFromJson() throws IOException {
@@ -170,12 +164,24 @@ public class GetDataService {
     public void storePoolDataToDB(PoolList poolList, Long id) throws IOException, InterruptedException, ExecutionException{
 
         long started = System.currentTimeMillis();
+        List<Callable<String>> callableList = new ArrayList<>();
+        List<Future<String>> futureList = new ArrayList<>();
 
-        futureList = executorService.invokeAll(createCallableList(poolList, futureList));
-        //System.out.println("Active threads: " + Thread.activeCount());
+        for (int i = 0; i < poolList.getPoolList().size(); i++)
+            callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolList.getPoolList().get(i))));
 
-        for (Future<PoolStatus> f : futureList ){
+        try{
+            futureList = executorService.invokeAll(callableList);
+            System.out.println("Active threads: " + Thread.activeCount());
+        } catch (ResourceAccessException e){
+            log.info("Pool resource access exception: " + e);
+        } catch (HttpServerErrorException e2){
+            log.info("Pool server error: " + e2);
+        } catch (IllegalStateException e3){
+            log.info("Pool server error: " + e3);
+        }
 
+        for (Future<String> f : futureList ){
             try {
                 System.out.println(f.get());
             } catch (ExecutionException e) {
@@ -186,41 +192,6 @@ public class GetDataService {
         }
 
         System.out.println("Time: " + (System.currentTimeMillis() - started));
-    }
-
-    public List<PoolStatus> poolStatusList (){
-
-        List<PoolStatus> poolStatusList = new ArrayList<>();
-        PoolList poolList = new PoolList();
-
-        try {
-            poolList = this.getPoolsListFromJson().get(0);
-        } catch (IOException e){
-            log.info("" + e);
-        }
-
-        for (int i = 0; i < poolList.getPoolList().size(); i++){
-
-            PoolStatus poolStatus = new PoolStatus();
-            poolStatus.setName(poolList.getPoolList().get(i).getName());
-
-            poolStatusList.add(poolStatus);
-        }
-
-        return poolStatusList;
-    }
-
-    public List<Callable<PoolStatus>> createCallableList (PoolList poolList, List<Future<PoolStatus>> futureList, List<PoolStatus> poolStatusList){
-
-        List<Callable<PoolStatus>> callableList = new ArrayList<>();
-
-        if(futureList.isEmpty())
-            for (int i = 0; i < poolList.getPoolList().size(); i++)
-                 callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolList.getPoolList().get(i)), poolList.getPoolList().get(i).getName()));
-        else{
-            for (int i = 0; i < futureList.size(); i++)
-                futureList.get(i).get().getStatus() != Status.OK ?
-        }
     }
 
     public PoolDef savePoolDefNewEntity(OffsetDateTime date, PoolList poolList, int i){
