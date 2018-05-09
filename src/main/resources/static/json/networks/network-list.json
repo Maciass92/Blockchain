@@ -3,7 +3,7 @@
     {
       "name" : "Turtle-Coin",
       "url" : "https://turtle-coin.com/",
-      "api_url" : "https://turtle-coin.com/q/hashrate",
+      "api_url" : "http://turtle-block.com/q/hashrate",
       "id" : "1"
     }
   ]

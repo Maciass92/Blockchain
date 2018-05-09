@@ -51,7 +51,7 @@ public class FindAndDisplayDataService {
 
     public String formatDate(OffsetDateTime dateTime){
 
-        return DateTimeFormatter.ofPattern("yyyy.MM.dd - HH:mm:ss:SSS").format(dateTime);
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd / HH:mm:ss").format(dateTime);
     }
 
     public double formatHashrate(double hashrate){
