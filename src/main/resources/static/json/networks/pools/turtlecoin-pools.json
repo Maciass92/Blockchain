@@ -43,6 +43,12 @@
             "type" : "forknote"
         },
         {
+            "name" : "CryptoHispano.net",
+            "url" : "http://trtl.cryptohispano.net/",
+            "api" : "http://trtl.cryptohispano.net:8117/",
+            "type" : "forknote"
+        },
+        {
             "name" : "CryptoKnight.cc",
             "url" : "https://cryptoknight.cc/turtle/",
             "api" : "https://cryptoknight.cc/rpc/turtle/",
@@ -67,9 +73,27 @@
             "type" : "forknote"
         },
         {
-            "name" : "Flashpool.club",
+            "name" : "FlashPool.club",
             "url" : "https://trtl.flashpool.club/",
             "api" : "https://api.trtl.flashpool.club/",
+            "type" : "forknote"
+        },
+        {
+            "name" : "FunkyPenguin.co.nz",
+            "url" : "https://trtl.heigh-ho.funkypenguin.co.nz/",
+            "api" : "https://api.trtl.heigh-ho.funkypenguin.co.nz/",
+            "type" : "forknote"
+        },
+        {
+            "name" : "GNTL TRTL",
+            "url" : "https://trtl.pool.gntl.co.uk/",
+            "api" : "https://trtl.pool.gntl.co.uk/api/",
+            "type" : "node.js"
+        },
+        {
+            "name" : "Mine.nu",
+            "url" : "http://turtle.mine.nu/",
+            "api" : "http://turtle.mine.nu:8117/",
             "type" : "forknote"
         },
         {
@@ -100,12 +124,6 @@
             "name" : "SlowAndSteady.fun",
             "url" : "http://slowandsteady.fun/",
             "api" : "http://slowandsteady.fun:8119/",
-            "type" : "forknote"
-        },
-        {
-            "name" : "SpacePools.org",
-            "url" : "https://turtle.spacepools.org/",
-            "api" : "https://turtle.spacepools.org/api/",
             "type" : "forknote"
         },
         {

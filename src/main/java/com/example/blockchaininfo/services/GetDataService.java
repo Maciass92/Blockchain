@@ -10,6 +10,7 @@ import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.hibernate.loader.custom.Return;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -63,7 +64,7 @@ public class GetDataService {
     @Scheduled(fixedRate = 5000)
     public void storeData() throws IOException, URISyntaxException, InterruptedException, ExecutionException{
 
-        OffsetDateTime date = OffsetDateTime.now();
+        OffsetDateTime date;
 
         for(NetworkDefinition networkDefinition : this.getNetworkListFromJson().getNetworkList()){
 
@@ -71,6 +72,7 @@ public class GetDataService {
 
             try {
                 hashrateFromApi = this.getJsonFromApi(networkDefinition.getApi_url());
+                date = OffsetDateTime.now();
             } catch (HttpServerErrorException e){
                 log.info("Network Server error e1: " + e);
                 break;
@@ -79,7 +81,7 @@ public class GetDataService {
                 break;
             }
 
-            //this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
+            this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
             this.connectToPoolApiAndStoreData(retrieveNetworkIdForPoolDefinition(date));
         }
     }
@@ -159,20 +161,17 @@ public class GetDataService {
 
         for(PoolList poolList : listOfPoolLists)
             this.storePoolDataToDB(poolList, id);
+
+       //listOfPoolLists.stream().forEach(this.storePoolDataToDB(poolList, id));
     }
 
     public void storePoolDataToDB(PoolList poolList, Long id) throws IOException, InterruptedException, ExecutionException{
 
         long started = System.currentTimeMillis();
-        List<Callable<String>> callableList = new ArrayList<>();
-        List<Future<String>> futureList = new ArrayList<>();
-
-        for (int i = 0; i < poolList.getPoolList().size(); i++)
-            callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolList.getPoolList().get(i))));
+        List<Future<ReturnedStringAndDate>> futureList = new ArrayList<>();
 
         try{
-            futureList = executorService.invokeAll(callableList);
-            System.out.println("Active threads: " + Thread.activeCount());
+            futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
         } catch (ResourceAccessException e){
             log.info("Pool resource access exception: " + e);
         } catch (HttpServerErrorException e2){
@@ -181,17 +180,28 @@ public class GetDataService {
             log.info("Pool server error: " + e3);
         }
 
-        for (Future<String> f : futureList ){
+        System.out.println("Time: " + (System.currentTimeMillis() - started));
+
+        for (int i = 0; i < futureList.size(); i++){
+
             try {
-                System.out.println(f.get());
-            } catch (ExecutionException e) {
-                log.info("Execution Exception: " + e);
-            } catch (InterruptedException e2){
-                log.info("Interrupted Exception: " + e2);
+                    PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get().getDateTime(), poolList, i);
+                    this.savePoolHashrateNewEntity(futureList.get(i).get().getJsonString(), poolList, poolDef, id, i);
+
+            } catch (ExecutionException e){
+                continue;
             }
         }
+    }
 
-        System.out.println("Time: " + (System.currentTimeMillis() - started));
+    public List<Callable<ReturnedStringAndDate>> createListOfCallableTasks(PoolList poolList){
+
+        List<Callable<ReturnedStringAndDate>> callableList = new ArrayList<>();
+
+        for (int i = 0; i < poolList.getPoolList().size(); i++)
+            callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolList.getPoolList().get(i)), poolList.getPoolList().get(i).getName()));
+
+        return callableList;
     }
 
     public PoolDef savePoolDefNewEntity(OffsetDateTime date, PoolList poolList, int i){

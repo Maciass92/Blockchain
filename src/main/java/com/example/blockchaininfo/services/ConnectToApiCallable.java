@@ -1,5 +1,6 @@
 package com.example.blockchaininfo.services;
 
+import com.example.blockchaininfo.pojos.ReturnedStringAndDate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -11,22 +12,28 @@ import java.time.OffsetDateTime;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public class ConnectToApiCallable implements Callable<String> {
+public class ConnectToApiCallable implements Callable<ReturnedStringAndDate> {
 
     private String url;
+    private String poolName;
 
-    public ConnectToApiCallable(String url) {
+    public ConnectToApiCallable(String url, String poolName) {
         this.url = url;
+        this.poolName = poolName;
     }
 
     @Override
-    public String call() throws Exception {
+    public ReturnedStringAndDate call() throws Exception {
 
             HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
             clientHttpRequestFactory.setConnectTimeout(4000);
-            clientHttpRequestFactory.setReadTimeout(4000);
             RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
 
-        return restTemplate.getForObject(url, String.class);
+            ReturnedStringAndDate stringAndDate = new ReturnedStringAndDate();
+            stringAndDate.setJsonString(restTemplate.getForObject(url, String.class));
+            stringAndDate.setDateTime(OffsetDateTime.now());
+            stringAndDate.setPoolName(this.poolName);
+
+        return stringAndDate;
     }
 }
