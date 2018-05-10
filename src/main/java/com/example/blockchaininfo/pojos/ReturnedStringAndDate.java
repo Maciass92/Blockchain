@@ -10,4 +10,5 @@ public class ReturnedStringAndDate {
     private String jsonString;
     private OffsetDateTime dateTime;
     private String poolName;
+    private String poolType;
 }

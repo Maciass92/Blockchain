@@ -1,6 +1,7 @@
 package com.example.blockchaininfo.services;
 
 import com.example.blockchaininfo.pojos.ReturnedStringAndDate;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -16,10 +17,12 @@ public class ConnectToApiCallable implements Callable<ReturnedStringAndDate> {
 
     private String url;
     private String poolName;
+    private String poolType;
 
-    public ConnectToApiCallable(String url, String poolName) {
+    public ConnectToApiCallable(String url, String poolName, String poolType) {
         this.url = url;
         this.poolName = poolName;
+        this.poolType = poolType;
     }
 
     @Override
@@ -33,7 +36,9 @@ public class ConnectToApiCallable implements Callable<ReturnedStringAndDate> {
             stringAndDate.setJsonString(restTemplate.getForObject(url, String.class));
             stringAndDate.setDateTime(OffsetDateTime.now());
             stringAndDate.setPoolName(this.poolName);
+            stringAndDate.setPoolType(this.poolType);
 
         return stringAndDate;
     }
+
 }
