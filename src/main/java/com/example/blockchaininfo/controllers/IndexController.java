@@ -24,7 +24,7 @@ public class IndexController {
 
     @ResponseBody
     @RequestMapping("/refresh")
-    public String refreshPage(Model model) throws JsonProcessingException {
+    public String refreshPage() throws JsonProcessingException {
 
         return netService.returnNetworkAsJson();
     }

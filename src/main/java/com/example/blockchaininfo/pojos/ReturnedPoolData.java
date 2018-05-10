@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public class ReturnedStringAndDate {
+public class ReturnedPoolData {
 
     private String jsonString;
     private OffsetDateTime dateTime;

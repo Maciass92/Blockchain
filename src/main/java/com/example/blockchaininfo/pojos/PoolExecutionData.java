@@ -32,8 +32,8 @@ public class PoolExecutionData {
         switch (this.errorCount){
 
             case 0: multiplier = 0; break;
-            case 1: multiplier = 10; break;
-            case 2: multiplier = 10; break;
+            case 1: multiplier = 0; break;
+            case 2: multiplier = 5; break;
             case 3: multiplier = 10; break;
             case 4: multiplier = 15; break;
             case 5: multiplier = 60; break;
