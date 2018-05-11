@@ -23,7 +23,7 @@ public class ConnectToApiCallable implements Callable<ReturnedPoolData> {
     }
 
     @Override
-    public ReturnedPoolData call() throws Exception {
+    public ReturnedPoolData call(){
 
             HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
             clientHttpRequestFactory.setConnectTimeout(4000);

@@ -130,7 +130,7 @@ public class GetDataService {
     public void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
 
         List<Future<ReturnedPoolData>> futureList = new ArrayList<>();
-        List<String> listOfNames = this.createListOfNames(poolList);
+        List<String> listOfNames = this.createListOfPoolNames(poolList);
 
         try{
             futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
@@ -177,7 +177,7 @@ public class GetDataService {
         return callableList;
     }
 
-    public List<String> createListOfNames(PoolList poolList){
+    public List<String> createListOfPoolNames(PoolList poolList){
 
         List<String> namesOrdered = new ArrayList<>();
 
