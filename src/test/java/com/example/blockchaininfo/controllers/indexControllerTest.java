@@ -2,6 +2,8 @@ package com.example.blockchaininfo.controllers;
 
 import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.services.FindAndDisplayDataService;
+import com.example.blockchaininfo.services.Quartz.FindAndDisplayDataServiceQuartz;
+import com.example.blockchaininfo.services.SpringScheduler.FindAndDisplayDataServiceSpringScheduler;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

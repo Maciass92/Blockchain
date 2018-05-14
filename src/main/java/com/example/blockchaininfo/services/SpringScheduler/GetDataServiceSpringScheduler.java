@@ -1,17 +1,22 @@
-package com.example.blockchaininfo.services;
+package com.example.blockchaininfo.services.SpringScheduler;
 
 import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolDef;
 import com.example.blockchaininfo.model.PoolHashrate;
-import com.example.blockchaininfo.pojos.*;
+import com.example.blockchaininfo.pojos.PoolDefinition;
+import com.example.blockchaininfo.pojos.PoolExecutionData;
+import com.example.blockchaininfo.pojos.PoolList;
+import com.example.blockchaininfo.pojos.ReturnedPoolData;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolDefRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
+import com.example.blockchaininfo.services.ConnectToApiCallable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,8 +32,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
+@Profile("springScheduler")
 @Service
-public class GetDataService {
+public class GetDataServiceSpringScheduler {
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolDefRepository poolDefRepository;
@@ -39,7 +45,7 @@ public class GetDataService {
     private final Map<String, PoolExecutionData> poolErrorMap;
 
 
-    public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
+    public GetDataServiceSpringScheduler(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
         this.poolDefRepository = poolDefRepository;
         this.poolHashrateRepository = poolHashrateRepository;
@@ -70,9 +76,9 @@ public class GetDataService {
                 this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
 
             } catch (HttpServerErrorException e){
-                log.info("Network Server error e1: " + e);
+                log.info("" + e);
             } catch (ResourceAccessException e2){
-                log.info("Network resource access exception: " + e2);
+                log.info("" + e2);
             }
     }
 
