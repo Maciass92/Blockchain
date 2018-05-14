@@ -159,11 +159,15 @@ public class GetDataService {
     private void processDataAndResolvePoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id) throws InterruptedException, IOException{
 
         for (int i = 0; i < futureList.size(); i++){
-            try {
-                PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get());
-                this.savePoolHashrateNewEntity(futureList.get(i).get(), poolDef, id);
-                poolErrorMap.get(poolDef.getName()).setErrorCount(0);
 
+            try {
+                if(futureList.get(i).get() == null || futureList.get(i).get().getJsonString() == null)
+                    continue;
+                else {
+                    PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get());
+                    this.savePoolHashrateNewEntity(futureList.get(i).get(), poolDef, id);
+                    poolErrorMap.get(poolDef.getName()).setErrorCount(0);
+                }
             } catch (ExecutionException e){
                 log.info("" + e);
                 poolErrorMap.get(listOfNames.get(i)).incrementErrorCount();

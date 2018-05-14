@@ -5,10 +5,12 @@ import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.example.blockchaininfo.services.FindAndDisplayDataService;
+import com.example.blockchaininfo.services.GetDataService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -23,6 +25,7 @@ public class FindAndDisplayDataServiceSpringScheduler implements FindAndDisplayD
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;
+    private final GetDataService getDataService;
 
     public List<NetworkHashrate> getAllNetworks(){
 
@@ -47,6 +50,9 @@ public class FindAndDisplayDataServiceSpringScheduler implements FindAndDisplayD
         return objectMapper.writeValueAsString(this.getAllNetworks());
     }
 
+    @Scheduled(fixedRate = 5000)
+    public void runScheduledTask(){
 
-
+        this.getDataService.storeData();
+    }
 }
