@@ -31,7 +31,7 @@ $(document).ready(function() {
                          var days = data.repDate.dayOfMonth < 10 ? days = "0" + data.repDate.dayOfMonth : days = data.repDate.dayOfMonth;
                          var hours = data.repDate.hour < 10 ? hours = "0" + data.repDate.hour : hours = data.repDate.hour;
 
-                         return data.repDate.year + "-" + months + "-" + days + "   " + hours + ":" + minutes + ":" + seconds;
+                         return data.repDate.year + "-" + months + "-" + days + " / " + hours + ":" + minutes + ":" + seconds;
                         },
                      },
 
@@ -51,7 +51,6 @@ $(document).ready(function() {
                "order": [[ 0, "asc" ]]
 });
 
-
 $(document).on('click', '#main-table tbody tr', function () {
   var id = $(this).find("td").eq(0).text();
   openPoolModal(id);
@@ -59,10 +58,9 @@ $(document).on('click', '#main-table tbody tr', function () {
 
 $('table').css('cursor','pointer');
 
-
 });
 
 
 setInterval(function(){
     table.ajax.reload(null, false);
-}, 8000);
+}, 10000);

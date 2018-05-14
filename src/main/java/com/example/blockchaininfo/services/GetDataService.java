@@ -1,14 +1,15 @@
 package com.example.blockchaininfo.services;
 
-import com.example.blockchaininfo.pojos.*;
 import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolDef;
 import com.example.blockchaininfo.model.PoolHashrate;
+import com.example.blockchaininfo.pojos.*;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolDefRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.core.io.ClassPathResource;
@@ -21,20 +22,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.lang.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
+import java.util.*;
+import java.util.concurrent.*;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class GetDataService {
 
@@ -42,169 +34,198 @@ public class GetDataService {
     private final PoolDefRepository poolDefRepository;
     private final PoolHashrateRepository poolHashrateRepository;
     private final ObjectMapper jsonMapper;
+    private final ExecutorService executorService;
 
-    public NetworkList getNetworkListFromJson() throws IOException {
+    private final Map<String, PoolExecutionData> poolErrorMap;
 
-        InputStream jsonNetworkDetailsFile = new ClassPathResource("/static/json/networks/network-list.json").getInputStream();
-        NetworkList networkList = this.jsonMapper.readValue(jsonNetworkDetailsFile, NetworkList.class);
-        jsonNetworkDetailsFile.close();
 
-        return networkList;
+    public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
+        this.networkHashrateRepository = networkHashrateRepository;
+        this.poolDefRepository = poolDefRepository;
+        this.poolHashrateRepository = poolHashrateRepository;
+        this.jsonMapper = jsonMapper;
+        this.executorService = Executors.newCachedThreadPool();
+
+        this.poolErrorMap = this.initializePoolErrorMap(this.getPoolsListFromJson());
+    }
+
+    private Map<String, PoolExecutionData> initializePoolErrorMap(PoolList poolList){
+
+        Map<String, PoolExecutionData> helperMap = new HashMap<>();
+
+        for (PoolDefinition p : poolList.getPoolList())
+            helperMap.put(p.getName(), new PoolExecutionData(OffsetDateTime.now().minusDays(1), p.getName()));
+
+        return helperMap;
     }
 
     @Scheduled(fixedRate = 5000)
-    public void storeData() throws IOException, URISyntaxException{
-
-        OffsetDateTime date = OffsetDateTime.now();
-
-        for(NetworkDefinition networkDefinition : this.getNetworkListFromJson().getNetworkList()){
-
-            String hashrateFromApi;
+    public void storeData() throws IOException, InterruptedException{
 
             try {
-                hashrateFromApi = this.getJsonFromApi(networkDefinition.getApi_url());
+                String hashrateFromApi = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
+                OffsetDateTime date = OffsetDateTime.now();
+
+                this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
+                this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
+
             } catch (HttpServerErrorException e){
                 log.info("Network Server error e1: " + e);
-                break;
             } catch (ResourceAccessException e2){
                 log.info("Network resource access exception: " + e2);
-                break;
             }
-
-            this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
-            this.connectToPoolApiAndStoreData(retrieveNetworkIdForPoolDefinition(date));
-        }
     }
 
-    public Long retrieveNetworkIdForPoolDefinition(OffsetDateTime date){
+    private String getNetworkHashrateFromApi(String url){
+
+        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
+        clientHttpRequestFactory.setConnectTimeout(7000);
+        clientHttpRequestFactory.setReadTimeout(7000);
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
+        ObjectNode objectNode = restTemplate.getForObject(url, ObjectNode.class);
+        JsonNode jsonNode = objectNode.get("hashrate");
+
+        return jsonNode.asText();
+    }
+
+    private Long retrieveNetworkIdForPoolDefinition(OffsetDateTime date){
 
         Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
 
         return networkHashrateOptional.isPresent() ? networkHashrateOptional.get().getId() : null;
     }
 
-    public String getJsonFromApi(String url){
 
-        HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
-        clientHttpRequestFactory.setConnectTimeout(1500);
-        clientHttpRequestFactory.setReadTimeout(1500);
-        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
-
-        String helperString = restTemplate.getForObject(url, String.class);
-
-        return helperString;
-    }
-
-    public void saveNetworkHashrateNewEntity(String hashrate_as_string, OffsetDateTime date){
+    private void saveNetworkHashrateNewEntity(String hashrateAsString, OffsetDateTime date){
 
         NetworkHashrate networkHashrate = new NetworkHashrate();
-        networkHashrate.setHashrate(Double.parseDouble(hashrate_as_string));
+        networkHashrate.setHashrate(Double.parseDouble(hashrateAsString));
         networkHashrate.setRepDate(date);
 
         networkHashrateRepository.save(networkHashrate);
     }
 
-    public List<Path> getAllFilePathsInFolder() throws IOException, URISyntaxException {
 
-        List<Path> listOfFiles = Files.walk(Paths.get(ClassLoader.getSystemResource("static/json/networks/pools/").toURI()))
-                .filter(Files::isRegularFile)
-                .collect(toList());
+    private PoolList getPoolsListFromJson(){
 
-        return listOfFiles;
-    }
+        PoolList poolList = new PoolList();
+        InputStream jsonPoolListFile = null;
 
-    public List<PoolList> getPoolsListFromJson() throws IOException, URISyntaxException {
-
-        List<PoolList> listOfPoolLists = new ArrayList<>();
-
-        for(Path path : this.getAllFilePathsInFolder()) {
-
-            InputStream jsonPoolsFile = new ClassPathResource(this.truncateFilePath(path)).getInputStream();
-            PoolList poolList = this.jsonMapper.readValue(jsonPoolsFile, PoolList.class);
-
-            listOfPoolLists.add(poolList);
-
-            jsonPoolsFile.close();
+        try {
+            jsonPoolListFile = new ClassPathResource("/static/json/turtlecoin-pools.json").getInputStream();
+            poolList = this.jsonMapper.readValue(jsonPoolListFile, PoolList.class);
+        } catch (IOException e){
+            log.info("" + e);
+        } finally{
+            try {
+                jsonPoolListFile.close();
+            } catch (IOException e){log.info("" + e);
+            }
         }
 
-        return listOfPoolLists;
+        return poolList;
     }
 
-    public String truncateFilePath(Path path){
+    private void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
 
-        String helperString = path.toString();
+        List<Future<ReturnedPoolData>> futureList = new ArrayList<>();
+        List<String> listOfNames = this.createListOfPoolNames(poolList);
 
-        return helperString.substring(helperString.indexOf("static") - 1, helperString.length());
+        try{
+            futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
+        } catch (ResourceAccessException e){
+            log.info("" + e);
+        } catch (HttpServerErrorException e2){
+            log.info("" + e2);
+        } catch (IllegalStateException e3){
+            log.info("" + e3);
+        }
+
+        this.processDataAndResolvePoolErrors(futureList, listOfNames, id);
     }
 
-    public void connectToPoolApiAndStoreData(Long id) throws IOException, URISyntaxException{
+    private void processDataAndResolvePoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id) throws InterruptedException, IOException{
 
-        List<PoolList> listOfPoolLists = this.getPoolsListFromJson();
-
-        for(PoolList poolList : listOfPoolLists)
-            this.storePoolDataToDB(poolList, id);
-    }
-
-    public void storePoolDataToDB(PoolList poolList, Long id) throws IOException{
-
-        for (int i = 0; i < poolList.getPoolList().size(); i++) {
-
-            OffsetDateTime date = OffsetDateTime.now();
-
-            String jsonString;
+        for (int i = 0; i < futureList.size(); i++){
             try {
-                jsonString = this.getJsonFromApi(this.appendPoolApiUrl(poolList.getPoolList().get(i)));
-            } catch (ResourceAccessException e){
-                log.info("Pool resource access exception: " + e);
-                continue;
-            } catch (HttpServerErrorException e2){
-                log.info("Pool server error: " + e2 + " - > on " + poolList.getPoolList().get(i).getApi());
+                PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get());
+                this.savePoolHashrateNewEntity(futureList.get(i).get(), poolDef, id);
+                poolErrorMap.get(poolDef.getName()).setErrorCount(0);
+
+            } catch (ExecutionException e){
+                log.info("" + e);
+                poolErrorMap.get(listOfNames.get(i)).incrementErrorCount();
+                poolErrorMap.get(listOfNames.get(i)).setExecutionDate();
                 continue;
             }
-
-            PoolDef poolDef = this.savePoolDefNewEntity(date, poolList, i);
-
-            this.savePoolHashrateNewEntity(jsonString, poolList, poolDef, id, i);
         }
     }
 
-    public PoolDef savePoolDefNewEntity(OffsetDateTime date, PoolList poolList, int i){
+    private List<Callable<ReturnedPoolData>> createListOfCallableTasks(PoolList poolList){
+
+        List<Callable<ReturnedPoolData>> callableList = new ArrayList<>();
+
+        for (int i = 0; i < poolList.getPoolList().size(); i++){
+
+            PoolDefinition poolDefinition = poolList.getPoolList().get(i);
+
+            if (isTaskExecutable(poolDefinition.getName()))
+                callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolDefinition), poolDefinition.getName(), poolDefinition.getType()));
+        }
+
+        return callableList;
+    }
+
+    private List<String> createListOfPoolNames(PoolList poolList){
+
+        List<String> namesOrdered = new ArrayList<>();
+
+        for (int i = 0; i < poolList.getPoolList().size(); i++){
+            if (isTaskExecutable(poolList.getPoolList().get(i).getName()))
+                namesOrdered.add(poolList.getPoolList().get(i).getName());
+        }
+
+        return namesOrdered;
+    }
+
+    private boolean isTaskExecutable(String name){
+
+        return this.poolErrorMap.get(name).getExecutionDate().isBefore(OffsetDateTime.now());
+    }
+
+    private PoolDef savePoolDefNewEntity(ReturnedPoolData returnedPoolData){
 
         PoolDef poolDef = new PoolDef();
-        poolDef.setDateFrom(date);
-        poolDef.setName(poolList.getPoolList().get(i).getName());
+        poolDef.setDateFrom(returnedPoolData.getDateTime());
+        poolDef.setName(returnedPoolData.getPoolName());
 
         poolDefRepository.save(poolDef);
 
         return poolDef;
     }
 
-    public void savePoolHashrateNewEntity(String jsonString, PoolList poolList, PoolDef poolDef, Long id, int i) throws IOException{
+    private void savePoolHashrateNewEntity(ReturnedPoolData returnedPoolData, PoolDef poolDef, Long id) throws IOException{
 
         PoolHashrate poolHashrate = new PoolHashrate();
-        poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(jsonString, poolList.getPoolList().get(i)));
-        poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(Long.valueOf(id)).get());
+        poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(returnedPoolData));
+        poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(id).get());
         poolHashrate.setPoolDef(poolDef);
 
         poolHashrateRepository.save(poolHashrate);
     }
 
-    public double retrieveHashrateFromJsonString(String string, PoolDefinition poolDefinition) throws IOException{
+    private double retrieveHashrateFromJsonString(ReturnedPoolData returnedPoolData) throws IOException{
 
-        PoolJson poolJson = this.jsonMapper.readValue(string, PoolJson.class);
+        JsonNode jsonNode = jsonMapper.readTree(returnedPoolData.getJsonString());
 
-        return checkIfPoolIsForknoteType(poolDefinition) ? poolJson.getPoolForknote().getHashrate() : poolJson.getPool_nodeJs().getHashRate();
+        return returnedPoolData.getPoolType().equals("forknote") ? jsonNode.get("pool").get("hashrate").asDouble() : jsonNode.get("pool_statistics").get("hashRate").asDouble();
     }
 
-    public String appendPoolApiUrl(PoolDefinition poolDefinition){
+    private String appendPoolApiUrl(PoolDefinition poolDefinition){
 
         StringBuilder appendedApi = new StringBuilder(poolDefinition.getApi());
 
-        return checkIfPoolIsForknoteType(poolDefinition) ? appendedApi.append("stats").toString() : appendedApi.append("pool/stats").toString();
-    }
-
-    public boolean checkIfPoolIsForknoteType(PoolDefinition poolDefinition){
-
-        return poolDefinition.getType().equals("forknote") ? true : false;
+        return poolDefinition.getType().equals("forknote") ? appendedApi.append("stats").toString() : appendedApi.append("pool/stats").toString();
     }
 }
