@@ -1,5 +1,6 @@
 package com.example.blockchaininfo.services.Quartz;
 
+import com.example.blockchaininfo.services.GetDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.annotation.Profile;
@@ -14,8 +15,8 @@ public class SampleJob extends QuartzJobBean {
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
 
-        GetDataServiceQuartz getDataServiceQuartz = (GetDataServiceQuartz) jobExecutionContext.getJobDetail().getJobDataMap().get("getDataServiceQuartz");
+        GetDataService getDataService = (GetDataService) jobExecutionContext.getJobDetail().getJobDataMap().get("getDataService");
 
-        getDataServiceQuartz.storeData();
+        getDataService.storeData();
     }
 }

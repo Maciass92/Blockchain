@@ -1,12 +1,9 @@
-package com.example.blockchaininfo.services.SpringScheduler;
+package com.example.blockchaininfo.services;
 
 import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolDef;
 import com.example.blockchaininfo.model.PoolHashrate;
-import com.example.blockchaininfo.pojos.PoolDefinition;
-import com.example.blockchaininfo.pojos.PoolExecutionData;
-import com.example.blockchaininfo.pojos.PoolList;
-import com.example.blockchaininfo.pojos.ReturnedPoolData;
+import com.example.blockchaininfo.pojos.*;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolDefRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
@@ -16,25 +13,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
-@Profile("springScheduler")
 @Service
-public class GetDataServiceSpringScheduler {
+public class GetDataService {
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolDefRepository poolDefRepository;
@@ -44,8 +46,7 @@ public class GetDataServiceSpringScheduler {
 
     private final Map<String, PoolExecutionData> poolErrorMap;
 
-
-    public GetDataServiceSpringScheduler(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
+    public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
         this.poolDefRepository = poolDefRepository;
         this.poolHashrateRepository = poolHashrateRepository;
@@ -65,8 +66,7 @@ public class GetDataServiceSpringScheduler {
         return helperMap;
     }
 
-    @Scheduled(fixedRate = 5000)
-    public void storeData() throws IOException, InterruptedException{
+    public void storeData(){
 
             try {
                 String hashrateFromApi = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
@@ -76,9 +76,13 @@ public class GetDataServiceSpringScheduler {
                 this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
 
             } catch (HttpServerErrorException e){
-                log.info("" + e);
+                log.info("Network Server error e1: " + e);
             } catch (ResourceAccessException e2){
-                log.info("" + e2);
+                log.info("Network resource access exception: " + e2);
+            } catch (IOException e3) {
+                log.info("IOException thrown");
+            } catch (InterruptedException e4){
+                log.info("Interrupted Exception thrown");
             }
     }
 
@@ -140,6 +144,7 @@ public class GetDataServiceSpringScheduler {
 
         try{
             futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
+            System.out.println("Active threads: " + Thread.activeCount());
         } catch (ResourceAccessException e){
             log.info("" + e);
         } catch (HttpServerErrorException e2){
@@ -233,5 +238,15 @@ public class GetDataServiceSpringScheduler {
         StringBuilder appendedApi = new StringBuilder(poolDefinition.getApi());
 
         return poolDefinition.getType().equals("forknote") ? appendedApi.append("stats").toString() : appendedApi.append("pool/stats").toString();
+    }
+
+    public String formatDate(OffsetDateTime dateTime){
+
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd / HH:mm:ss").format(dateTime);
+    }
+
+    public double formatHashrate(double hashrate){
+
+        return hashrate/1000.0;
     }
 }

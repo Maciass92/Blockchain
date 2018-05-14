@@ -47,14 +47,6 @@ public class FindAndDisplayDataServiceSpringScheduler implements FindAndDisplayD
         return objectMapper.writeValueAsString(this.getAllNetworks());
     }
 
-    public String formatDate(OffsetDateTime dateTime){
 
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd / HH:mm:ss").format(dateTime);
-    }
-
-    public double formatHashrate(double hashrate){
-
-        return hashrate/1000.0;
-    }
 
 }

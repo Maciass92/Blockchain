@@ -12,6 +12,4 @@ public interface FindAndDisplayDataService {
     public List<NetworkHashrate> getAllNetworks();
     public List<PoolHashrate> getAllPools(Long id);
     public String returnNetworkAsJson() throws JsonProcessingException;
-    public String formatDate(OffsetDateTime dateTime);
-    public double formatHashrate(double hashrate);
 }

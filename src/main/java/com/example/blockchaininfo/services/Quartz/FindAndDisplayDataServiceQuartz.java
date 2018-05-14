@@ -5,6 +5,7 @@ import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.example.blockchaininfo.services.FindAndDisplayDataService;
+import com.example.blockchaininfo.services.GetDataService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
 
     private final NetworkHashrateRepository networkHashrateRepository;
     private final PoolHashrateRepository poolHashrateRepository;
-    private final GetDataServiceQuartz getDataServiceQuartz;
+    private final GetDataService getDataService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent){
@@ -44,7 +45,7 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
             scheduler.start();
 
             JobDetail job = JobBuilder.newJob(SampleJob.class).build();
-            job.getJobDataMap().put("getDataServiceQuartz", this.getDataServiceQuartz);
+            job.getJobDataMap().put("getDataService", this.getDataService);
 
             Trigger trigger = TriggerBuilder
                     .newTrigger()
@@ -82,15 +83,4 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
 
         return objectMapper.writeValueAsString(this.getAllNetworks());
     }
-
-    public String formatDate(OffsetDateTime dateTime){
-
-        return DateTimeFormatter.ofPattern("yyyy-MM-dd / HH:mm:ss").format(dateTime);
-    }
-
-    public double formatHashrate(double hashrate){
-
-        return hashrate/1000.0;
-    }
-
 }
