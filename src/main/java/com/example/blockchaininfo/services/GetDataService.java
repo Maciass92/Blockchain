@@ -49,7 +49,7 @@ public class GetDataService {
         this.poolErrorMap = this.initializePoolErrorMap(this.getPoolsListFromJson());
     }
 
-    public Map<String, PoolExecutionData> initializePoolErrorMap(PoolList poolList){
+    private Map<String, PoolExecutionData> initializePoolErrorMap(PoolList poolList){
 
         Map<String, PoolExecutionData> helperMap = new HashMap<>();
 
@@ -76,7 +76,7 @@ public class GetDataService {
             }
     }
 
-    public String getNetworkHashrateFromApi(String url){
+    private String getNetworkHashrateFromApi(String url){
 
         HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
         clientHttpRequestFactory.setConnectTimeout(7000);
@@ -89,7 +89,7 @@ public class GetDataService {
         return jsonNode.asText();
     }
 
-    public Long retrieveNetworkIdForPoolDefinition(OffsetDateTime date){
+    private Long retrieveNetworkIdForPoolDefinition(OffsetDateTime date){
 
         Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
 
@@ -97,7 +97,7 @@ public class GetDataService {
     }
 
 
-    public void saveNetworkHashrateNewEntity(String hashrateAsString, OffsetDateTime date){
+    private void saveNetworkHashrateNewEntity(String hashrateAsString, OffsetDateTime date){
 
         NetworkHashrate networkHashrate = new NetworkHashrate();
         networkHashrate.setHashrate(Double.parseDouble(hashrateAsString));
@@ -107,7 +107,7 @@ public class GetDataService {
     }
 
 
-    public PoolList getPoolsListFromJson(){
+    private PoolList getPoolsListFromJson(){
 
         PoolList poolList = new PoolList();
         InputStream jsonPoolListFile = null;
@@ -127,7 +127,7 @@ public class GetDataService {
         return poolList;
     }
 
-    public void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
+    private void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
 
         List<Future<ReturnedPoolData>> futureList = new ArrayList<>();
         List<String> listOfNames = this.createListOfPoolNames(poolList);
@@ -145,7 +145,7 @@ public class GetDataService {
         this.processDataAndResolvePoolErrors(futureList, listOfNames, id);
     }
 
-    public void processDataAndResolvePoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id) throws InterruptedException, IOException{
+    private void processDataAndResolvePoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id) throws InterruptedException, IOException{
 
         for (int i = 0; i < futureList.size(); i++){
             try {
@@ -162,7 +162,7 @@ public class GetDataService {
         }
     }
 
-    public List<Callable<ReturnedPoolData>> createListOfCallableTasks(PoolList poolList){
+    private List<Callable<ReturnedPoolData>> createListOfCallableTasks(PoolList poolList){
 
         List<Callable<ReturnedPoolData>> callableList = new ArrayList<>();
 
@@ -177,7 +177,7 @@ public class GetDataService {
         return callableList;
     }
 
-    public List<String> createListOfPoolNames(PoolList poolList){
+    private List<String> createListOfPoolNames(PoolList poolList){
 
         List<String> namesOrdered = new ArrayList<>();
 
@@ -189,12 +189,12 @@ public class GetDataService {
         return namesOrdered;
     }
 
-    public boolean isTaskExecutable(String name){
+    private boolean isTaskExecutable(String name){
 
         return this.poolErrorMap.get(name).getExecutionDate().isBefore(OffsetDateTime.now());
     }
 
-    public PoolDef savePoolDefNewEntity(ReturnedPoolData returnedPoolData){
+    private PoolDef savePoolDefNewEntity(ReturnedPoolData returnedPoolData){
 
         PoolDef poolDef = new PoolDef();
         poolDef.setDateFrom(returnedPoolData.getDateTime());
@@ -205,7 +205,7 @@ public class GetDataService {
         return poolDef;
     }
 
-    public void savePoolHashrateNewEntity(ReturnedPoolData returnedPoolData, PoolDef poolDef, Long id) throws IOException{
+    private void savePoolHashrateNewEntity(ReturnedPoolData returnedPoolData, PoolDef poolDef, Long id) throws IOException{
 
         PoolHashrate poolHashrate = new PoolHashrate();
         poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(returnedPoolData));
@@ -215,14 +215,14 @@ public class GetDataService {
         poolHashrateRepository.save(poolHashrate);
     }
 
-    public double retrieveHashrateFromJsonString(ReturnedPoolData returnedPoolData) throws IOException{
+    private double retrieveHashrateFromJsonString(ReturnedPoolData returnedPoolData) throws IOException{
 
         JsonNode jsonNode = jsonMapper.readTree(returnedPoolData.getJsonString());
 
         return returnedPoolData.getPoolType().equals("forknote") ? jsonNode.get("pool").get("hashrate").asDouble() : jsonNode.get("pool_statistics").get("hashRate").asDouble();
     }
 
-    public String appendPoolApiUrl(PoolDefinition poolDefinition){
+    private String appendPoolApiUrl(PoolDefinition poolDefinition){
 
         StringBuilder appendedApi = new StringBuilder(poolDefinition.getApi());
 
