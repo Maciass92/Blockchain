@@ -7,32 +7,25 @@ import com.example.blockchaininfo.pojos.*;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolDefRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
-import com.example.blockchaininfo.services.ConnectToApiCallable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -75,14 +68,8 @@ public class GetDataService {
                 this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
                 this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
 
-            } catch (HttpServerErrorException e){
-                log.info("Network Server error e1: " + e);
-            } catch (ResourceAccessException e2){
-                log.info("Network resource access exception: " + e2);
-            } catch (IOException e3) {
-                log.info("IOException thrown");
-            } catch (InterruptedException e4){
-                log.info("Interrupted Exception thrown");
+            } catch (HttpServerErrorException | InterruptedException | IOException | ResourceAccessException e){
+                log.info("" + e);
             }
     }
 
@@ -92,6 +79,11 @@ public class GetDataService {
         clientHttpRequestFactory.setConnectTimeout(7000);
         clientHttpRequestFactory.setReadTimeout(7000);
         RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
+        return getHashrateFromJson(restTemplate, url);
+    }
+
+    private String getHashrateFromJson(RestTemplate restTemplate, String url){
 
         ObjectNode objectNode = restTemplate.getForObject(url, ObjectNode.class);
         JsonNode jsonNode = objectNode.get("hashrate");
@@ -103,9 +95,8 @@ public class GetDataService {
 
         Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
 
-        return networkHashrateOptional.isPresent() ? networkHashrateOptional.get().getId() : null;
+        return networkHashrateOptional.map(NetworkHashrate::getId).orElse(null);
     }
-
 
     private void saveNetworkHashrateNewEntity(String hashrateAsString, OffsetDateTime date){
 
@@ -145,12 +136,8 @@ public class GetDataService {
         try{
             futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
             System.out.println("Active threads: " + Thread.activeCount());
-        } catch (ResourceAccessException e){
+        } catch (ResourceAccessException | IllegalStateException | HttpServerErrorException e){
             log.info("" + e);
-        } catch (HttpServerErrorException e2){
-            log.info("" + e2);
-        } catch (IllegalStateException e3){
-            log.info("" + e3);
         }
 
         this.processDataAndResolvePoolErrors(futureList, listOfNames, id);
@@ -161,11 +148,13 @@ public class GetDataService {
         for (int i = 0; i < futureList.size(); i++){
 
             try {
-                if(futureList.get(i).get() == null || futureList.get(i).get().getJsonString() == null)
+                ReturnedPoolData returnedPoolData = futureList.get(i).get();
+
+                if(returnedPoolData == null || returnedPoolData.getJsonString() == null)
                     continue;
                 else {
-                    PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get());
-                    this.savePoolHashrateNewEntity(futureList.get(i).get(), poolDef, id);
+                    PoolDef poolDef = this.savePoolDefNewEntity(returnedPoolData);
+                    this.savePoolHashrateNewEntity(returnedPoolData, poolDef, id);
                     poolErrorMap.get(poolDef.getName()).setErrorCount(0);
                 }
             } catch (ExecutionException e){
@@ -194,14 +183,10 @@ public class GetDataService {
 
     private List<String> createListOfPoolNames(PoolList poolList){
 
-        List<String> namesOrdered = new ArrayList<>();
-
-        for (int i = 0; i < poolList.getPoolList().size(); i++){
-            if (isTaskExecutable(poolList.getPoolList().get(i).getName()))
-                namesOrdered.add(poolList.getPoolList().get(i).getName());
-        }
-
-        return namesOrdered;
+        return poolList.getPoolList().stream()
+                .filter(q -> isTaskExecutable(q.getName()))
+                .map(PoolDefinition::getName)
+                .collect(Collectors.toList());
     }
 
     private boolean isTaskExecutable(String name){

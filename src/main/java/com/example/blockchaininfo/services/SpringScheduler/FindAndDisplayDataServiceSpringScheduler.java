@@ -13,9 +13,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -29,18 +26,12 @@ public class FindAndDisplayDataServiceSpringScheduler implements FindAndDisplayD
 
     public List<NetworkHashrate> getAllNetworks(){
 
-        List<NetworkHashrate> networkHashrateList = networkHashrateRepository.findAll();
-
-        return networkHashrateList;
+        return networkHashrateRepository.findAll();
     }
 
     public List<PoolHashrate> getAllPools(Long id){
 
-        List<PoolHashrate> poolsList = new ArrayList<>();
-
-        poolHashrateRepository.findAllByNetworkId(id).iterator().forEachRemaining(poolsList::add);
-
-        return poolsList;
+        return poolHashrateRepository.findAllByNetworkId(id);
     }
 
     public String returnNetworkAsJson() throws JsonProcessingException {

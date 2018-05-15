@@ -3,7 +3,6 @@ package com.example.blockchaininfo.services;
 import com.example.blockchaininfo.pojos.ReturnedPoolData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 

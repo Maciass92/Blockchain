@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -52,8 +51,8 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
                                     .withIntervalInSeconds(5).repeatForever())
                     .build();
 
-
             scheduler.scheduleJob(job, trigger);
+
         } catch (SchedulerException e){
             log.info("" + e);
         }
@@ -61,18 +60,12 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
 
     public List<NetworkHashrate> getAllNetworks(){
 
-        List<NetworkHashrate> networkHashrateList = networkHashrateRepository.findAll();
-
-        return networkHashrateList;
+        return networkHashrateRepository.findAll();
     }
 
     public List<PoolHashrate> getAllPools(Long id){
 
-        List<PoolHashrate> poolsList = new ArrayList<>();
-
-        poolHashrateRepository.findAllByNetworkId(id).iterator().forEachRemaining(poolsList::add);
-
-        return poolsList;
+        return poolHashrateRepository.findAllByNetworkId(id);
     }
 
     public String returnNetworkAsJson() throws JsonProcessingException {
