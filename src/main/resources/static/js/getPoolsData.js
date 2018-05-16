@@ -1,4 +1,4 @@
-//The very first version included reading APIs via frontend. Had to switch to backend
+//The very first version included reading APIs via frontend. Switched to backend
 
 function getPoolsData(){
 $.getJSON('../json/networks/Turtlecoin/turtlecoin-pools.json', function(data) {

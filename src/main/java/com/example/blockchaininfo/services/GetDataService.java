@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -23,8 +22,10 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,7 +38,6 @@ public class GetDataService {
     private final ExecutorService executorService;
 
     private final Map<String, PoolExecutionData> poolErrorMap;
-
 
     public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
@@ -59,8 +59,7 @@ public class GetDataService {
         return helperMap;
     }
 
-    @Scheduled(fixedRate = 5000)
-    public void storeData() throws IOException, InterruptedException{
+    public void storeData(){
 
             try {
                 String hashrateFromApi = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
@@ -69,10 +68,8 @@ public class GetDataService {
                 this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
                 this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
 
-            } catch (HttpServerErrorException e){
-                log.info("Network Server error e1: " + e);
-            } catch (ResourceAccessException e2){
-                log.info("Network resource access exception: " + e2);
+            } catch (HttpServerErrorException | InterruptedException | IOException | ResourceAccessException e){
+                log.info("" + e);
             }
     }
 
@@ -82,6 +79,11 @@ public class GetDataService {
         clientHttpRequestFactory.setConnectTimeout(7000);
         clientHttpRequestFactory.setReadTimeout(7000);
         RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+
+        return getHashrateFromJson(restTemplate, url);
+    }
+
+    private String getHashrateFromJson(RestTemplate restTemplate, String url){
 
         ObjectNode objectNode = restTemplate.getForObject(url, ObjectNode.class);
         JsonNode jsonNode = objectNode.get("hashrate");
@@ -93,9 +95,8 @@ public class GetDataService {
 
         Optional<NetworkHashrate> networkHashrateOptional = networkHashrateRepository.findByDate(date);
 
-        return networkHashrateOptional.isPresent() ? networkHashrateOptional.get().getId() : null;
+        return networkHashrateOptional.map(NetworkHashrate::getId).orElse(null);
     }
-
 
     private void saveNetworkHashrateNewEntity(String hashrateAsString, OffsetDateTime date){
 
@@ -134,12 +135,9 @@ public class GetDataService {
 
         try{
             futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
-        } catch (ResourceAccessException e){
+            System.out.println("Active threads: " + Thread.activeCount());
+        } catch (ResourceAccessException | IllegalStateException | HttpServerErrorException e){
             log.info("" + e);
-        } catch (HttpServerErrorException e2){
-            log.info("" + e2);
-        } catch (IllegalStateException e3){
-            log.info("" + e3);
         }
 
         this.processDataAndResolvePoolErrors(futureList, listOfNames, id);
@@ -148,11 +146,17 @@ public class GetDataService {
     private void processDataAndResolvePoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id) throws InterruptedException, IOException{
 
         for (int i = 0; i < futureList.size(); i++){
-            try {
-                PoolDef poolDef = this.savePoolDefNewEntity(futureList.get(i).get());
-                this.savePoolHashrateNewEntity(futureList.get(i).get(), poolDef, id);
-                poolErrorMap.get(poolDef.getName()).setErrorCount(0);
 
+            try {
+                ReturnedPoolData returnedPoolData = futureList.get(i).get();
+
+                if(returnedPoolData == null || returnedPoolData.getJsonString() == null)
+                    continue;
+                else {
+                    PoolDef poolDef = this.savePoolDefNewEntity(returnedPoolData);
+                    this.savePoolHashrateNewEntity(returnedPoolData, poolDef, id);
+                    poolErrorMap.get(poolDef.getName()).setErrorCount(0);
+                }
             } catch (ExecutionException e){
                 log.info("" + e);
                 poolErrorMap.get(listOfNames.get(i)).incrementErrorCount();
@@ -179,14 +183,10 @@ public class GetDataService {
 
     private List<String> createListOfPoolNames(PoolList poolList){
 
-        List<String> namesOrdered = new ArrayList<>();
-
-        for (int i = 0; i < poolList.getPoolList().size(); i++){
-            if (isTaskExecutable(poolList.getPoolList().get(i).getName()))
-                namesOrdered.add(poolList.getPoolList().get(i).getName());
-        }
-
-        return namesOrdered;
+        return poolList.getPoolList().stream()
+                .filter(q -> isTaskExecutable(q.getName()))
+                .map(PoolDefinition::getName)
+                .collect(Collectors.toList());
     }
 
     private boolean isTaskExecutable(String name){
@@ -227,5 +227,15 @@ public class GetDataService {
         StringBuilder appendedApi = new StringBuilder(poolDefinition.getApi());
 
         return poolDefinition.getType().equals("forknote") ? appendedApi.append("stats").toString() : appendedApi.append("pool/stats").toString();
+    }
+
+    public String formatDate(OffsetDateTime dateTime){
+
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd / HH:mm:ss").format(dateTime);
+    }
+
+    public double formatHashrate(double hashrate){
+
+        return hashrate/1000.0;
     }
 }

@@ -13,7 +13,8 @@ $.ajax({
                        { "orderSequence": [ "asc", "desc" ] },
                        { "orderSequence": [ "asc", "desc" ] },
                        { "orderSequence": [ "desc", "asc" ] }
-                         ]
+                         ],
+            "order": [[ 2, "desc" ]]
     });
     }
 });

@@ -1,4 +1,4 @@
-//The very first version included reading APIs via frontend. Had to switch to backend.
+//The very first version included reading APIs via frontend. Switched to backend.
 
 function getNetworkData(){
 $.getJSON('../json/networks/network-list.json', function(data) {
