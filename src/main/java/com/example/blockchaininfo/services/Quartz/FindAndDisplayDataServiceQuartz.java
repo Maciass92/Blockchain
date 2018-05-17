@@ -1,14 +1,9 @@
 package com.example.blockchaininfo.services.Quartz;
 
-import com.example.blockchaininfo.model.NetworkHashrate;
-import com.example.blockchaininfo.model.PoolHashrate;
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.example.blockchaininfo.services.FindAndDisplayDataService;
 import com.example.blockchaininfo.services.GetDataService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -17,32 +12,30 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-@RequiredArgsConstructor
 @Profile("quartz")
 @Slf4j
 @Service
-public class FindAndDisplayDataServiceQuartz implements ApplicationListener<ContextRefreshedEvent>, FindAndDisplayDataService {
+public class FindAndDisplayDataServiceQuartz extends FindAndDisplayDataService implements ApplicationListener<ContextRefreshedEvent>  {
 
-    private final NetworkHashrateRepository networkHashrateRepository;
-    private final PoolHashrateRepository poolHashrateRepository;
-    private final GetDataService getDataService;
+    public FindAndDisplayDataServiceQuartz(NetworkHashrateRepository networkHashrateRepository, PoolHashrateRepository poolHashrateRepository, GetDataService getDataService) {
+        super(networkHashrateRepository, poolHashrateRepository, getDataService);
+    }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent){
 
-        this.startQuartzScheduling();
+        this.runScheduledTask();
     }
 
-    public void startQuartzScheduling (){
+    @Override
+    public void runScheduledTask(){
 
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
 
-            JobDetail job = JobBuilder.newJob(SampleJob.class).build();
-            job.getJobDataMap().put("getDataService", this.getDataService);
+            JobDetail job = JobBuilder.newJob(GatherDataJob.class).build();
+            job.getJobDataMap().put("getDataService", getDataService);
 
             Trigger trigger = TriggerBuilder
                     .newTrigger()
@@ -56,22 +49,5 @@ public class FindAndDisplayDataServiceQuartz implements ApplicationListener<Cont
         } catch (SchedulerException e){
             log.info("" + e);
         }
-    }
-
-    public List<NetworkHashrate> getAllNetworks(){
-
-        return networkHashrateRepository.findAll();
-    }
-
-    public List<PoolHashrate> getAllPools(Long id){
-
-        return poolHashrateRepository.findAllByNetworkId(id);
-    }
-
-    public String returnNetworkAsJson() throws JsonProcessingException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        return objectMapper.writeValueAsString(this.getAllNetworks());
     }
 }

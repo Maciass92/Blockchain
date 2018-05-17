@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class IndexController {
 
-    private final FindAndDisplayDataService netService;
+    private final FindAndDisplayDataService findAndDisplayDataService;
 
     @RequestMapping("")
     public String getAllNetworks(Model model){
 
-        model.addAttribute("networkHashrates", netService.getAllNetworks());
+        model.addAttribute("networkHashrates", findAndDisplayDataService.getAllNetworks());
 
         return "main";
     }
@@ -26,13 +26,13 @@ public class IndexController {
     @RequestMapping("/refresh")
     public String refreshPage() throws JsonProcessingException {
 
-        return netService.returnNetworkAsJson();
+        return findAndDisplayDataService.returnNetworkAsJson();
     }
 
     @RequestMapping("/{id}")
     public String getNetworkDetails(Model model, @PathVariable String id){
 
-        model.addAttribute("poolHashrates", netService.getAllPools(Long.valueOf(id)));
+        model.addAttribute("poolHashrates", findAndDisplayDataService.getAllPools(Long.valueOf(id)));
 
         return "networkDetails :: modalContents";
     }

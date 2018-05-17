@@ -2,13 +2,37 @@ package com.example.blockchaininfo.services;
 
 import com.example.blockchaininfo.model.NetworkHashrate;
 import com.example.blockchaininfo.model.PoolHashrate;
+import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
+import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-public interface FindAndDisplayDataService {
+@RequiredArgsConstructor
+public abstract class FindAndDisplayDataService {
 
-    List<NetworkHashrate> getAllNetworks();
-    List<PoolHashrate> getAllPools(Long id);
-    String returnNetworkAsJson() throws JsonProcessingException;
+    public final NetworkHashrateRepository networkHashrateRepository;
+    public final PoolHashrateRepository poolHashrateRepository;
+    public final GetDataService getDataService;
+
+    public List<NetworkHashrate> getAllNetworks(){
+
+        return networkHashrateRepository.findAll();
+    }
+
+    public List<PoolHashrate> getAllPools(Long id){
+
+        return poolHashrateRepository.findAllByNetworkId(id);
+    }
+
+    public String returnNetworkAsJson() throws JsonProcessingException{
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.writeValueAsString(this.getAllNetworks());
+    }
+
+    public abstract void runScheduledTask();
 }

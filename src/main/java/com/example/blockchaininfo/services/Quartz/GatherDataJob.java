@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Profile("quartz")
 @Component
-public class SampleJob extends QuartzJobBean {
+public class GatherDataJob extends QuartzJobBean {
 
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) {
