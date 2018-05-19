@@ -20,8 +20,13 @@
 
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
 
     <script type="text/javascript" src="../js/openPoolModal.js" th:src="@{/js/openPoolModal.js}"></script>
+
+
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
 
 </head>
 
@@ -35,6 +40,7 @@
                     <div class="table-responsive" id="main-content" th:fragment="table-content">
 
                         <script type="text/javascript" src="../js/sortAndRefreshTable.js" th:src="@{/js/sortAndRefreshTable.js}"></script>
+                        <script type="text/javascript" src="../js/pieChart.js" th:src="@{/js/pieChart.js}"></script>
 
                         <table class="table table-hover" id="main-table">
 

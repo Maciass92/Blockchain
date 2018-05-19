@@ -149,18 +149,20 @@ public class GetDataService {
 
         for (int i = 0; i < dataFromApi.size(); i++){
 
+            boolean isErrorCase = false;
+
             try {
                 returnedPoolData = dataFromApi.get(i).get();
 
                 if(returnedPoolData == null || returnedPoolData.getJsonString().isEmpty())
-                    throw new IllegalArgumentException("Returned data was empty.");
-                else
-                    this.processAndStoreData(returnedPoolData, i, calledApis, id, false);
+                    isErrorCase = true;
 
             } catch (ExecutionException | IllegalArgumentException e){
                 log.info("" + e);
-                this.processAndStoreData(returnedPoolData, i, calledApis, id, true);
+                isErrorCase = true;
             }
+
+            this.processAndStoreData(returnedPoolData, i, calledApis, id, isErrorCase);
         }
 
         this.saveNonRespondingPools(nonRespondingPools, id);

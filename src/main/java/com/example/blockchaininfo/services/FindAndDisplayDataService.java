@@ -34,5 +34,12 @@ public abstract class FindAndDisplayDataService {
         return objectMapper.writeValueAsString(this.getAllNetworks());
     }
 
+    public String returnPoolsAsJson(Long id) throws JsonProcessingException{
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.writeValueAsString(this.getAllPools(id));
+    }
+
     public abstract void runScheduledTask();
 }

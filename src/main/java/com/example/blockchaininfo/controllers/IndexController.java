@@ -35,6 +35,15 @@ public class IndexController {
         return findAndDisplayDataService.returnNetworkAsJson();
     }
 
+    @ResponseBody
+    @RequestMapping("/pooldata/{id}")
+    public String poolsData(@PathVariable String id) throws JsonProcessingException {
+
+        return findAndDisplayDataService.returnPoolsAsJson(Long.valueOf(id));
+    }
+
+
+
     @RequestMapping("/{id}")
     public String getNetworkDetails(Model model, @PathVariable String id){
 
