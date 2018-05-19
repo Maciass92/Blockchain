@@ -38,10 +38,6 @@ public class IndexController {
     @RequestMapping("/{id}")
     public String getNetworkDetails(Model model, @PathVariable String id){
 
-      //  List<PoolHashrate> poolHashrateList =
-        //        Stream.concat(findAndDisplayDataService.getAllPools(Long.valueOf(id)).stream(), findAndDisplayDataService.getDataService.createListOfNonRespondingPools(Long.valueOf(id)).stream())
-          //              .collect(Collectors.toList());
-
         model.addAttribute("poolHashrates", findAndDisplayDataService.getAllPools(Long.valueOf(id)));
 
         return "networkDetails :: modalContents";

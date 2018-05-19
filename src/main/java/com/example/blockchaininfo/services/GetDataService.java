@@ -130,40 +130,40 @@ public class GetDataService {
 
     private void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
 
-        List<Future<ReturnedPoolData>> futureList = new ArrayList<>();
-        List<String> listOfNames = this.createListOfPoolNames(poolList);
-        List<String> listOfNonRespondingPools = this.createListOfNonRespondingPools(poolList);
+        List<Future<ReturnedPoolData>> dataFromApi = null;
+        List<String> calledApis = this.createListOfPoolNames(poolList);
+        List<String> nonRespondingPools = this.createListOfNonRespondingPools(poolList);
 
         try{
-            futureList = executorService.invokeAll(this.createListOfCallableTasks(poolList));
+            dataFromApi = executorService.invokeAll(this.createListOfCallableTasks(poolList));
         } catch (ResourceAccessException | IllegalStateException | HttpServerErrorException e){
             log.info("" + e);
         }
 
-        this.checkForPoolErrors(futureList, listOfNames, id, listOfNonRespondingPools);
+        this.checkForPoolErrors(dataFromApi, calledApis, id, nonRespondingPools);
     }
 
-    private void checkForPoolErrors(List<Future<ReturnedPoolData>> futureList, List<String> listOfNames, Long id, List<String> nonRespondingPools) throws InterruptedException, IOException{
+    private void checkForPoolErrors(List<Future<ReturnedPoolData>> dataFromApi, List<String> calledApis, Long id, List<String> nonRespondingPools) throws InterruptedException, IOException{
 
         ReturnedPoolData returnedPoolData = null;
 
-        for (int i = 0; i < futureList.size(); i++){
+        for (int i = 0; i < dataFromApi.size(); i++){
 
             try {
-                returnedPoolData = futureList.get(i).get();
+                returnedPoolData = dataFromApi.get(i).get();
 
                 if(returnedPoolData == null || returnedPoolData.getJsonString().isEmpty())
-                    this.processAndStoreData(returnedPoolData, i, listOfNames, id, true);
+                    throw new IllegalArgumentException("Returned data was empty.");
                 else
-                    this.processAndStoreData(returnedPoolData, i, listOfNames, id, false);
+                    this.processAndStoreData(returnedPoolData, i, calledApis, id, false);
 
-            } catch (ExecutionException e){
+            } catch (ExecutionException | IllegalArgumentException e){
                 log.info("" + e);
-                this.processAndStoreData(returnedPoolData, i, listOfNames, id, true);
+                this.processAndStoreData(returnedPoolData, i, calledApis, id, true);
             }
         }
 
-        this.processAndStoreData(returnedPoolData);
+        this.saveNonRespondingPools(nonRespondingPools, id);
     }
 
     private List<Callable<ReturnedPoolData>> createListOfCallableTasks(PoolList poolList){
@@ -202,25 +202,30 @@ public class GetDataService {
         return this.poolErrorMap.get(name).getExecutionDate().isBefore(OffsetDateTime.now());
     }
 
-    public void processAndStoreData(ReturnedPoolData returnedPoolData, Integer i, List<String> listOfNames, Long id, boolean errorPresent) throws IOException{
+    public void processAndStoreData(ReturnedPoolData returnedPoolData, Integer i, List<String> apis, Long id, boolean errorPresent) throws IOException{
 
-        PoolDef poolDef = this.savePoolDefNewEntity(returnedPoolData, errorPresent, i, listOfNames);
-        this.savePoolHashrateNewEntity(returnedPoolData, poolDef, id, errorPresent, listOfNames, i);
-        this.setPoolErrors(i, errorPresent, listOfNames);
+        PoolDef poolDef = this.savePoolDefNewEntity(returnedPoolData, errorPresent, i, apis);
+        this.savePoolHashrateNewEntity(returnedPoolData, poolDef, id, errorPresent);
+
+        this.setPoolErrors(i, errorPresent, apis);
     }
 
-    private void saveNonRespondingPools(List<String> nonRespondingPools, Long id){
+    private void saveNonRespondingPools(List<String> nonRespondingPools, Long id) throws IOException{
 
-        //this.processAndStoreData(null, null, nonRespondingPools, id, true);
+        for (int i = 0; i < nonRespondingPools.size(); i++){
+
+            PoolDef poolDef = this.savePoolDefNewEntity(null, true, i, nonRespondingPools);
+            this.savePoolHashrateNewEntity(null, poolDef, id, true);
+        }
     }
 
-    private PoolDef savePoolDefNewEntity(ReturnedPoolData returnedPoolData, boolean errorPresent, Integer i, List<String> listOfNames){
+    private PoolDef savePoolDefNewEntity(ReturnedPoolData returnedPoolData, boolean errorPresent, Integer i, List<String> apis){
 
         PoolDef poolDef = new PoolDef();
 
         if (errorPresent){
             poolDef.setDateFrom(OffsetDateTime.now());
-            poolDef.setName(listOfNames.get(i));
+            poolDef.setName(apis.get(i));
         } else {
             poolDef.setDateFrom(returnedPoolData.getDateTime());
             poolDef.setName(returnedPoolData.getPoolName());
@@ -231,19 +236,17 @@ public class GetDataService {
         return poolDef;
     }
 
-    private void savePoolHashrateNewEntity(ReturnedPoolData returnedPoolData, PoolDef poolDef, Long id, boolean errorPresent, List<String> listOfNames, Integer i) throws IOException{
+    private void savePoolHashrateNewEntity(ReturnedPoolData returnedPoolData, PoolDef poolDef, Long id, boolean errorPresent) throws IOException{
 
         PoolHashrate poolHashrate = new PoolHashrate();
 
-        if (errorPresent){
+        if (errorPresent)
             poolHashrate.setHashrate(0);
-            poolHashrate.setPoolDef(poolDef);
-            poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(id).get());
-        } else {
+        else
             poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(returnedPoolData));
-            poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(id).get());
+
             poolHashrate.setPoolDef(poolDef);
-        }
+            poolHashrate.setNetworkHashrate(networkHashrateRepository.findById(id).get());
 
         poolHashrateRepository.save(poolHashrate);
     }
