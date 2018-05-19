@@ -39,7 +39,7 @@
                         </thead>
 
                         <tbody>
-                        <tr th:each="poolHashrate : ${poolHashrates}" th:style="${@getDataService.formatDate(poolHashrate.poolDef.dateFrom)} == '1111-11-11 / 11:11:11' ? 'background: #ffb0b3;' : 'background: #ffffff;'">
+                        <tr th:each="poolHashrate : ${poolHashrates}" th:style="${@getDataService.formatHashrate(poolHashrate.hashrate)} == '0.0' ? 'background: #ffb0b3;' : 'background: #ffffff;'">
                             <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
                             <td class="text-center" th:text="${@getDataService.formatDate(poolHashrate.poolDef.dateFrom)}">Sample street</td>
                             <td class="text-center" th:text="${@getDataService.formatHashrate(poolHashrate.hashrate)}">999-999-999</td>
