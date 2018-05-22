@@ -62,11 +62,10 @@ public class GetDataService {
     public void storeData(){
 
         try {
-            String hashrateFromApi = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
+            String networkHashrate = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
             OffsetDateTime date = OffsetDateTime.now();
 
-            this.saveNetworkHashrateNewEntity(hashrateFromApi, date);
-            this.storePoolDataToDB(this.getPoolsListFromJson(), retrieveNetworkIdForPoolDefinition(date));
+            this.storePoolDataToDB(this.getPoolsListFromJson(), networkHashrate, date);
 
         } catch (HttpServerErrorException | InterruptedException | IOException | ResourceAccessException e){
             log.info("" + e);
@@ -128,7 +127,7 @@ public class GetDataService {
         return poolList;
     }
 
-    private void storePoolDataToDB(PoolList poolList, Long id) throws InterruptedException, IOException{
+    private void storePoolDataToDB(PoolList poolList, String networkHashrate, OffsetDateTime date) throws InterruptedException, IOException{
 
         List<Future<ReturnedPoolData>> dataFromApi = null;
         List<String> calledApis = this.createListOfPoolNames(poolList);
@@ -140,12 +139,15 @@ public class GetDataService {
             log.info("" + e);
         }
 
-        this.checkForPoolErrors(dataFromApi, calledApis, id, nonRespondingPools);
+        this.checkForPoolErrors(dataFromApi, calledApis, nonRespondingPools, networkHashrate, date);
     }
 
-    private void checkForPoolErrors(List<Future<ReturnedPoolData>> dataFromApi, List<String> calledApis, Long id, List<String> nonRespondingPools) throws InterruptedException, IOException{
+    private void checkForPoolErrors(List<Future<ReturnedPoolData>> dataFromApi, List<String> calledApis, List<String> nonRespondingPools, String networkHashrate, OffsetDateTime date) throws InterruptedException, IOException{
 
         ReturnedPoolData returnedPoolData = null;
+
+        this.saveNetworkHashrateNewEntity(networkHashrate, date);
+        Long id = this.retrieveNetworkIdForPoolDefinition(date);
 
         for (int i = 0; i < dataFromApi.size(); i++){
 
@@ -162,7 +164,7 @@ public class GetDataService {
                 isErrorCase = true;
             }
 
-            this.processAndStoreData(returnedPoolData, i, calledApis, id, isErrorCase);
+            this.processAndStoreData(returnedPoolData, i, calledApis, isErrorCase, id);
         }
 
         this.saveNonRespondingPools(nonRespondingPools, id);
@@ -176,6 +178,7 @@ public class GetDataService {
 
             PoolDefinition poolDefinition = poolList.getPoolList().get(i);
 
+            //todo implement Factory
             if (isTaskExecutable(poolDefinition.getName()))
                 callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolDefinition), poolDefinition.getName(), poolDefinition.getType()));
         }
@@ -204,7 +207,7 @@ public class GetDataService {
         return this.poolErrorMap.get(name).getExecutionDate().isBefore(OffsetDateTime.now());
     }
 
-    public void processAndStoreData(ReturnedPoolData returnedPoolData, Integer i, List<String> apis, Long id, boolean errorPresent) throws IOException{
+    public void processAndStoreData(ReturnedPoolData returnedPoolData, Integer i, List<String> apis, boolean errorPresent, Long id) throws IOException{
 
         PoolDef poolDef = this.savePoolDefNewEntity(returnedPoolData, errorPresent, i, apis);
         this.savePoolHashrateNewEntity(returnedPoolData, poolDef, id, errorPresent);
@@ -253,13 +256,13 @@ public class GetDataService {
         poolHashrateRepository.save(poolHashrate);
     }
 
-    private void setPoolErrors(Integer i, Boolean errorPresent, List<String> listOfNames){
+    private void setPoolErrors(Integer i, Boolean errorPresent, List<String> calledApis){
 
         if(errorPresent) {
-            poolErrorMap.get(listOfNames.get(i)).incrementErrorCount();
-            poolErrorMap.get(listOfNames.get(i)).setExecutionDate();
+            poolErrorMap.get(calledApis.get(i)).incrementErrorCount();
+            poolErrorMap.get(calledApis.get(i)).setExecutionDate();
         } else
-            poolErrorMap.get(listOfNames.get(i)).setErrorCount(0);
+            poolErrorMap.get(calledApis.get(i)).setErrorCount(0);
     }
 
     private double retrieveHashrateFromJsonString(ReturnedPoolData returnedPoolData) throws IOException{

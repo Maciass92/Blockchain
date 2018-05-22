@@ -15,7 +15,7 @@
 
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title text-center" th:text="'Network: ' + ${poolHashrates[0].networkHashrate.id}">Network Id</h4>
+                <h4 class="modal-title text-center" th:text="'Network: ' + ${poolHashrates[0].networkHashrate.id} + ' - ' + 'Data Set @ ' + ${@getDataService.formatDate(poolHashrates[0].networkHashrate.repDate)}">Network Id</h4>
             </div>
 
             <div class="modal-body">
@@ -27,7 +27,9 @@
                             <div class="table-responsive">
                                 <table width="100%" class="table table-hover " id="poolTable">
 
+                                    <input type="hidden" id="networkId" th:value="${poolHashrates[0].networkHashrate.id}"/></td>
                                     <script type="text/javascript" src="../js/pieChart.js" th:src="@{/js/pieChart.js}"></script>
+                                    <script src="js/color-hash.js"></script>
 
                                     <thead class="thead-inverse">
                                     <tr>
@@ -49,11 +51,15 @@
 
                         </div>
 
-
                         <div class="col-md-6">
-                            <p> Known pools hashrate </p>
 
-                            <canvas id="poolsChart" style="margin: 0 auto;" height="300"></canvas>
+                            <div class="row">
+                                <h3 class="text-center"> Known pools hashrate </h3>
+                            </div>
+
+                            <div class="row">
+                                <canvas id="poolsChart" style="margin: 0 auto;" height="300"></canvas>
+                            </div>
 
                         </div>
 

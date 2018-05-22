@@ -42,10 +42,8 @@ public class IndexController {
         return findAndDisplayDataService.returnPoolsAsJson(Long.valueOf(id));
     }
 
-
-
     @RequestMapping("/{id}")
-    public String getNetworkDetails(Model model, @PathVariable String id){
+    public String getNetworkDetails(Model model, @PathVariable String id) throws JsonProcessingException{
 
         model.addAttribute("poolHashrates", findAndDisplayDataService.getAllPools(Long.valueOf(id)));
 
