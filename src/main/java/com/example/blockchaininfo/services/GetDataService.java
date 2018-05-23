@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,9 @@ public class GetDataService {
 
     private final Map<String, PoolExecutionData> poolErrorMap;
 
+    @Value("${network.url}")
+    private final String networkUrl;
+
     public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
         this.poolDefRepository = poolDefRepository;
@@ -47,6 +51,7 @@ public class GetDataService {
         this.executorService = Executors.newCachedThreadPool();
 
         this.poolErrorMap = this.initializePoolErrorMap(this.getPoolsListFromJson());
+        this.networkUrl = "";
     }
 
     private Map<String, PoolExecutionData> initializePoolErrorMap(PoolList poolList){
@@ -62,7 +67,7 @@ public class GetDataService {
     public void storeData(){
 
         try {
-            String networkHashrate = this.getNetworkHashrateFromApi("http://public.turtlenode.io:11898/getinfo");
+            String networkHashrate = this.getNetworkHashrateFromApi(networkUrl);
             OffsetDateTime date = OffsetDateTime.now();
 
             this.storePoolDataToDB(this.getPoolsListFromJson(), networkHashrate, date);
@@ -246,7 +251,7 @@ public class GetDataService {
         PoolHashrate poolHashrate = new PoolHashrate();
 
         if (errorPresent)
-            poolHashrate.setHashrate(0);
+            poolHashrate.setHashrate(-0.001);
         else
             poolHashrate.setHashrate(this.retrieveHashrateFromJsonString(returnedPoolData));
 
@@ -286,6 +291,6 @@ public class GetDataService {
 
     public double formatHashrate(double hashrate){
 
-        return hashrate/1000.0;
+        return hashrate < 0 ? hashrate*1000.0 : hashrate/1000.0;
     }
 }

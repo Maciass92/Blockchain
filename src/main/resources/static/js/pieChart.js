@@ -17,7 +17,7 @@ $.ajax({
         }
 
         if(totalKnownPoolHashrate < networkHashrate)
-            var unknownPools = networkHashrate - totalKnownPoolHashrate;
+            var unknownPools = Math.floor(networkHashrate - totalKnownPoolHashrate);
 
         var labels = poolData.map(function(e) {
            return e.poolDef.name;
@@ -29,16 +29,19 @@ $.ajax({
         });
         data.push(unknownPools);
 
-        var customHash = function(str) {
-            return ColorHash.BKDRHash(str) / 13;
-        };
+    var colors = poolData.map(function(){
 
-        var colorHash = new ColorHash({hash: customHash, lightness: [0.66, 0.77, 0.88] });
+                var r = Math.floor(Math.random() * 200);
+                var g = Math.floor(Math.random() * 200);
+                var b = Math.floor(Math.random() * 200);
+                var color = 'rgb(' + r + ', ' + g + ', ' + b + ')';
 
-        var colors = poolData.map(function(e){
-            return colorHash.hex(e.poolDef.name);
-        });
-        colors.push("#666666");
+        return color;
+     });
+
+        console.log(labels);
+        console.log(data);
+        console.log(colors);
 
 var ctx = document.getElementById('poolsChart').getContext('2d');
 var chart = new Chart(ctx, {

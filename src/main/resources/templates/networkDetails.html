@@ -29,7 +29,6 @@
 
                                     <input type="hidden" id="networkId" th:value="${poolHashrates[0].networkHashrate.id}"/></td>
                                     <script type="text/javascript" src="../js/pieChart.js" th:src="@{/js/pieChart.js}"></script>
-                                    <script src="js/color-hash.js"></script>
 
                                     <thead class="thead-inverse">
                                     <tr>
@@ -40,7 +39,7 @@
                                     </thead>
 
                                     <tbody>
-                                    <tr th:each="poolHashrate : ${poolHashrates}" th:style="${@getDataService.formatHashrate(poolHashrate.hashrate)} == '0.0' ? 'background: #ffb0b3;' : 'background: #ffffff;'">
+                                    <tr th:each="poolHashrate : ${poolHashrates}" th:style="${@getDataService.formatHashrate(poolHashrate.hashrate)} == '-1.0' ? 'background: #ffb0b3;' : 'background: #ffffff;'">
                                         <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
                                         <td class="text-center" th:text="${@getDataService.formatDate(poolHashrate.poolDef.dateFrom)}">Sample street</td>
                                         <td class="text-center" th:text="${@getDataService.formatHashrate(poolHashrate.hashrate)}">999-999-999</td>
