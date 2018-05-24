@@ -185,7 +185,7 @@ public class GetDataService {
 
             //todo implement Factory
             if (isTaskExecutable(poolDefinition.getName()))
-                callableList.add(new ConnectToApiCallable(this.appendPoolApiUrl(poolDefinition), poolDefinition.getName(), poolDefinition.getType()));
+                callableList.add(new ApiConnectorCallable(this.appendPoolApiUrl(poolDefinition), poolDefinition.getName(), poolDefinition.getType()));
         }
 
         return callableList;

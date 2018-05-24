@@ -1,4 +1,4 @@
-package com.example.blockchaininfo.services;
+package com.example.blockchaininfo.pojos;
 
 import com.example.blockchaininfo.pojos.ReturnedPoolData;
 import lombok.extern.slf4j.Slf4j;
@@ -10,13 +10,13 @@ import java.time.OffsetDateTime;
 import java.util.concurrent.Callable;
 
 @Slf4j
-public class ConnectToApiCallable implements Callable<ReturnedPoolData> {
+public class ApiConnectorCallable implements Callable<ReturnedPoolData> {
 
     private String url;
     private String poolName;
     private String poolType;
 
-    public ConnectToApiCallable(String url, String poolName, String poolType) {
+    public ApiConnectorCallable(String url, String poolName, String poolType) {
         this.url = url;
         this.poolName = poolName;
         this.poolType = poolType;

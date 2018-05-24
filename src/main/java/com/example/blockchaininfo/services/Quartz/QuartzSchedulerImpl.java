@@ -2,8 +2,8 @@ package com.example.blockchaininfo.services.Quartz;
 
 import com.example.blockchaininfo.repositories.NetworkHashrateRepository;
 import com.example.blockchaininfo.repositories.PoolHashrateRepository;
-import com.example.blockchaininfo.services.FindAndDisplayDataService;
 import com.example.blockchaininfo.services.GetDataService;
+import com.example.blockchaininfo.services.SchedulerService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Profile("quartz")
 @Slf4j
 @Service
-public class FindAndDisplayDataServiceQuartzScheduler extends FindAndDisplayDataService implements ApplicationListener<ContextRefreshedEvent>  {
+public class QuartzSchedulerImpl extends SchedulerService implements ApplicationListener<ContextRefreshedEvent> {
 
-    public FindAndDisplayDataServiceQuartzScheduler(NetworkHashrateRepository networkHashrateRepository, PoolHashrateRepository poolHashrateRepository, GetDataService getDataService) {
+    public QuartzSchedulerImpl(NetworkHashrateRepository networkHashrateRepository, PoolHashrateRepository poolHashrateRepository, GetDataService getDataService) {
         super(networkHashrateRepository, poolHashrateRepository, getDataService);
     }
 
@@ -27,7 +27,6 @@ public class FindAndDisplayDataServiceQuartzScheduler extends FindAndDisplayData
         this.runScheduledTask();
     }
 
-    @Override
     public void runScheduledTask(){
 
         try {

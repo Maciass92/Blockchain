@@ -27,15 +27,13 @@ and change the value of active profile to either:
 * [Hibernate](http://hibernate.org/) - ORM tool
 * [Postgre database](https://www.postgresql.org/)
 * [Thymeleaf](https://www.thymeleaf.org/) - Template engine
-* [Project Lombok](https://projectlombok.org/) - Boilerplate 
-code generator
+* [Project Lombok](https://projectlombok.org/) - Boilerplate code generator
 * [Jackson] (https://github.com/FasterXML/jackson) - JSON parser for Java
 
 
 ### Known issues
 
-Calling to pools' apis is done in a pitiful way. Currently working on async calls.
-
+--
 
 ## Authors
 

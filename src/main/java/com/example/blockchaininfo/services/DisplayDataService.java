@@ -7,11 +7,13 @@ import com.example.blockchaininfo.repositories.PoolHashrateRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-public abstract class FindAndDisplayDataService {
+@Service
+public class DisplayDataService {
 
     public final NetworkHashrateRepository networkHashrateRepository;
     public final PoolHashrateRepository poolHashrateRepository;
@@ -40,6 +42,4 @@ public abstract class FindAndDisplayDataService {
 
         return objectMapper.writeValueAsString(this.getAllPools(id));
     }
-
-    public abstract void runScheduledTask();
 }
