@@ -19,6 +19,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.OffsetDateTime;
@@ -37,13 +38,13 @@ public class GetDataService {
     private final ObjectMapper jsonMapper;
     private final ExecutorService executorService;
 
-    private final Map<String, PoolExecutionData> poolErrorMap;
+    private Map<String, PoolExecutionData> poolErrorMap;
 
     @Value("${network.url}")
-    private final String networkUrl;
+    private String networkUrl;
 
     @Value("${pools.url}")
-    private final String poolsUrl;
+    private String poolsUrl;
 
     public GetDataService(NetworkHashrateRepository networkHashrateRepository, PoolDefRepository poolDefRepository, PoolHashrateRepository poolHashrateRepository, ObjectMapper jsonMapper) {
         this.networkHashrateRepository = networkHashrateRepository;
@@ -51,10 +52,10 @@ public class GetDataService {
         this.poolHashrateRepository = poolHashrateRepository;
         this.jsonMapper = jsonMapper;
         this.executorService = Executors.newCachedThreadPool();
+    }
 
-        this.networkUrl = "";
-        this.poolsUrl = "";
-
+    @PostConstruct
+    public void init(){
         this.poolErrorMap = this.initializePoolErrorMap(this.getPoolsListFromJson());
     }
 
@@ -121,11 +122,8 @@ public class GetDataService {
         PoolList poolList = null;
         RestTemplate restTemplate = new RestTemplate();
 
-        System.out.println(this.poolsUrl);
-        String url = "https://raw.githubusercontent.com/turtlecoin/turtlecoin-pools-json/master/v2/turtlecoin-pools.json";
-
         try {
-            poolList = this.jsonMapper.readValue(restTemplate.getForObject(url, String.class), PoolList.class);
+            poolList = this.jsonMapper.readValue(restTemplate.getForObject(this.poolsUrl, String.class), PoolList.class);
 
         } catch (IOException e){
             log.info("" + e);
@@ -166,7 +164,7 @@ public class GetDataService {
                 if(returnedPoolData == null || returnedPoolData.getJsonString().isEmpty())
                     isErrorCase = true;
 
-            } catch (ExecutionException | ResourceAccessException e){
+            } catch (ExecutionException e){
                 log.info("" + e);
                 isErrorCase = true;
             }

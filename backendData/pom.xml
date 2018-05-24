@@ -11,7 +11,7 @@
 
     <artifactId>backend-data</artifactId>
     <groupId>backend-data</groupId>
-    <version>1.0</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
 
