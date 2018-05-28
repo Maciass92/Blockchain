@@ -4,51 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <title>Network Details</title>
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
-    <script  src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
 </head>
 
 <body>
 
 <div class="modal fade" id="personalModal" role="dialog" th:fragment="modalContents">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
 
         <div class="modal-content">
+
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title text-center" th:text="'Network: ' + ${poolHashrates[0].networkHashrate.id}">Network Id</h4>
+                <h4 class="modal-title text-center" th:text="'Network: ' + ${poolHashrates[0].networkHashrate.id} + ' - ' + 'Data Set @ ' + ${@getDataService.formatDate(poolHashrates[0].networkHashrate.repDate)}">Network Id</h4>
             </div>
+
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table width="100%" class="table table-hover " id="poolTable">
 
-                        <thead class="thead-inverse">
-                        <tr>
-                            <th class="col-md-2 text-center">Pool name</th>
-                            <th class="col-md-2 text-center">Date from</th>
-                            <th class="col-md-2 text-center">Hashrate [KH/s]</th>
-                        </tr>
-                        </thead>
+                <div class="container-fluid">
+                    <div class="row">
 
-                        <tbody>
-                        <tr th:each="poolHashrate : ${poolHashrates}">
-                            <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
-                            <td class="text-center" th:text="${@getDataService.formatDate(poolHashrate.poolDef.dateFrom)}">Maven Street 10, Glasgow</td>
-                            <td class="text-center" th:text="${@getDataService.formatHashrate(poolHashrate.hashrate)}">999-999-999</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table width="100%" class="table table-hover " id="poolTable">
+
+                                    <input type="hidden" id="networkId" th:value="${poolHashrates[0].networkHashrate.id}"/></td>
+                                    <script type="text/javascript" src="../js/pieChart.js" th:src="@{/js/pieChart.js}"></script>
+
+                                    <thead class="thead-inverse">
+                                    <tr>
+                                        <th class="col-md-2 text-center">Pool name</th>
+                                        <th class="col-md-2 text-center">Date from</th>
+                                        <th class="col-md-2 text-center">Hashrate [KH/s]</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr th:each="poolHashrate : ${poolHashrates}" th:style="${@getDataService.formatHashrate(poolHashrate.hashrate)} == '-1.0' ? 'background: #ffb0b3;' : 'background: #ffffff;'">
+                                        <td class="text-center" th:text="${poolHashrate.poolDef.name}"> Sample data</td>
+                                        <td class="text-center" th:text="${@getDataService.formatDate(poolHashrate.poolDef.dateFrom)}">Sample street</td>
+                                        <td class="text-center" th:text="${@getDataService.formatHashrate(poolHashrate.hashrate)}">999-999-999</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="row">
+                                <h3 class="text-center"> Known pools hashrate </h3>
+                            </div>
+
+                            <div class="row">
+                                <canvas id="poolsChart" style="margin: 0 auto;" height="300"></canvas>
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 </div>
 </body>

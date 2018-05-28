@@ -25,7 +25,7 @@ public class FindAndDisplayDataServiceSpringScheduler extends FindAndDisplayData
         super(networkHashrateRepository, poolHashrateRepository, getDataService);
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 10000)
     public void runScheduledTask(){
 
         getDataService.storeData();

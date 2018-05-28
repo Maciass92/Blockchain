@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Profile("quartz")
 @Slf4j
 @Service
-public class FindAndDisplayDataServiceQuartz extends FindAndDisplayDataService implements ApplicationListener<ContextRefreshedEvent>  {
+public class FindAndDisplayDataServiceQuartzScheduler extends FindAndDisplayDataService implements ApplicationListener<ContextRefreshedEvent>  {
 
-    public FindAndDisplayDataServiceQuartz(NetworkHashrateRepository networkHashrateRepository, PoolHashrateRepository poolHashrateRepository, GetDataService getDataService) {
+    public FindAndDisplayDataServiceQuartzScheduler(NetworkHashrateRepository networkHashrateRepository, PoolHashrateRepository poolHashrateRepository, GetDataService getDataService) {
         super(networkHashrateRepository, poolHashrateRepository, getDataService);
     }
 
